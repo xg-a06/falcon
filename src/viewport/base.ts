@@ -1,3 +1,5 @@
+import Transform from '../helper/transform';
+
 type ElmSize = {
   width: number;
   height: number;
@@ -9,7 +11,7 @@ interface DisplayState {
   hflip: boolean;
   vflip: boolean;
   scale: number;
-  rotate: number;
+  angle: number;
   invert: boolean;
   offset: { x: number; y: number };
   wwwc: { ww: number; wc: number };
@@ -26,11 +28,13 @@ class Base2D {
 
   elm: HTMLElement;
 
-  renderCanvas: HTMLElement;
+  renderCanvas: HTMLCanvasElement;
 
-  canvas: HTMLElement;
+  canvas: HTMLCanvasElement;
 
   displayState: DisplayState;
+
+  transform: Transform;
 
   renderData: unknown;
 
@@ -39,6 +43,7 @@ class Base2D {
   constructor(options: BaseOptions) {
     this.id = options.id!;
     this.elm = options.elm;
+    this.transform = new Transform();
     this.renderer = options.renderer;
 
     this.displayState = this.initDisplayState();
@@ -51,7 +56,7 @@ class Base2D {
       hflip: false,
       vflip: false,
       scale: 1,
-      rotate: 0,
+      angle: 0,
       invert: false,
       offset: { x: 0, y: 0 },
       wwwc: { ww: 0, wc: 0 },
@@ -59,14 +64,14 @@ class Base2D {
     };
   }
 
-  initRenderCanvas(): HTMLElement {
+  initRenderCanvas(): HTMLCanvasElement {
     const renderCanvas = document.createElement('canvas');
     renderCanvas.width = 0;
     renderCanvas.height = 0;
     return renderCanvas;
   }
 
-  initCanvas(): HTMLElement {
+  initCanvas(): HTMLCanvasElement {
     const { width, height } = this.getElmSize();
     const canvas = document.createElement('canvas');
     canvas.id = this.id;
@@ -85,6 +90,34 @@ class Base2D {
     const { clientWidth, clientHeight } = this.elm;
     return { width: clientWidth, height: clientHeight };
   }
+
+  setTransform(ctx: CanvasRenderingContext2D): void {
+    const {
+      transform,
+      canvas,
+      renderCanvas,
+      displayState: { offset, angle, scale, hflip, vflip },
+    } = this;
+
+    // const autoScale = Math.min(canvas.width / renderCanvas.width, canvas.height / renderCanvas.height);
+    transform.reset();
+    transform.translate(offset.x, offset.y);
+    transform.translate(canvas.width / 2, canvas.height / 2);
+    transform.scale(scale, scale);
+    transform.rotate(angle);
+    transform.scale(hflip ? -1 : 1, vflip ? -1 : 1);
+    transform.translate(-renderCanvas.width / 2, -renderCanvas.height / 2);
+    ctx.setTransform(
+      transform.mat[0],
+      transform.mat[1],
+      transform.mat[2],
+      transform.mat[3],
+      transform.mat[4],
+      transform.mat[5],
+    );
+  }
+
+  // draw(): void {}
 }
 
 export default Base2D;
