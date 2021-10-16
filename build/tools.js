@@ -9,7 +9,7 @@ function resolve(dir) {
 const isProd = process.env.NODE_ENV === 'production';
 
 function getEntries() {
-  let indexs = glob('demo/*/index.js', { sync: true });
+  let indexs = glob('demo/*/index.ts', { sync: true });
   const htmlPlugins = [
     new HtmlWebpackPlugin({
       template: resolve('demo/index.html'),
@@ -30,11 +30,11 @@ function getEntries() {
           inject: 'body',
           minify: true,
           chunks: [`demo/${entry}`],
-        })
+        }),
       );
       return ret;
     },
-    { 'demo/index': resolve('demo/index.js') }
+    { 'demo/index': resolve('demo/index.ts') },
   );
   return { entries, htmlPlugins };
 }

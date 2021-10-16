@@ -10,7 +10,7 @@ threadLoader.warmup(
   {
     workers: 4,
   },
-  ['babel-loader', '@babel/preset-env']
+  ['babel-loader', '@babel/preset-env'],
 );
 
 const baseConfig = {
@@ -20,14 +20,11 @@ const baseConfig = {
   entry: {
     index: resolve('src/index.ts'),
   },
-  experiments: {
-    outputModule: true,
-  },
   output: {
     filename: '[name].js',
     path: resolve(`dist`),
     library: {
-      type: 'module',
+      type: 'umd',
     },
   },
   resolve: {
@@ -39,12 +36,12 @@ const baseConfig = {
   module: {
     rules: [
       {
-        test: /\.worker\.js$/,
+        test: /\.worker\.ts$/,
         use: {
           loader: 'worker-loader',
           options: { inline: 'fallback' },
         },
-        include: [resolve('packages')],
+        include: [resolve('src')],
       },
       {
         test: /\.[t|j]s?$/,

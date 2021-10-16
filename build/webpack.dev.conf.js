@@ -11,10 +11,10 @@ const devConfig = {
   entry: {
     ...entries,
   },
-    module: {
+  module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.[t|j]s?$/,
         use: {
           loader: 'eslint-loader',
           options: {
@@ -26,7 +26,7 @@ const devConfig = {
       },
     ],
   },
-    plugins: [new HotModuleReplacementPlugin(), ...htmlPlugins],
+  plugins: [new HotModuleReplacementPlugin(), ...htmlPlugins],
   devServer: devServer,
 };
 

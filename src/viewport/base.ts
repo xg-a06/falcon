@@ -117,7 +117,29 @@ class Base2D {
     );
   }
 
-  // draw(): void {}
+  getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
+    const context = canvas.getContext('2d');
+
+    if (context === null) {
+      throw new Error('getContext 2d rendering contexts error');
+    }
+
+    return context;
+  }
+
+  draw(): void {
+    const { renderCanvas, canvas } = this;
+    const { width, height } = canvas;
+    if (width === 0 || height === 0) {
+      return;
+    }
+    const ctx = this.getCanvasContext(canvas);
+    // ctx.fillStyle = 'black';
+    ctx.clearRect(0, 0, width, height);
+    const { width: renderWidth, height: renderHeight } = renderCanvas;
+    this.setTransform(ctx);
+    ctx.drawImage(renderCanvas, 0, 0, renderWidth, renderHeight, 0, 0, renderWidth, renderHeight);
+  }
 }
 
 export default Base2D;
