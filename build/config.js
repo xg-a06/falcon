@@ -10,7 +10,7 @@ const config = {
     index: 'index.html',
     overlay: {
       errors: true,
-      warnings: true,
+      warnings: false,
     },
     historyApiFallback: true,
     proxy: {

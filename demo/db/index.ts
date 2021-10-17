@@ -1,4 +1,8 @@
-import sdk from '@src';
+import DB from '@src/cache/db';
 
-console.log(sdk);
-console.log(sdk.sum(1, 2));
+async function test() {
+  const db = await DB.getInstance({ name: 'test', version: 2 });
+  console.log(db);
+}
+
+test();

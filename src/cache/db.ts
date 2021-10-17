@@ -2,7 +2,11 @@ interface DBOptions {
   name: string;
   version: number;
 }
-
+declare global {
+  interface Window {
+    client: any;
+  }
+}
 class DB {
   private indexDB = window.indexedDB;
 
@@ -25,7 +29,7 @@ class DB {
     this.request = this.indexDB.open(name, version);
   }
 
-  async getInstance(options: DBOptions): Promise<IDBDatabase> {
+  static async getInstance(options: DBOptions): Promise<IDBDatabase> {
     const instance = new DB(options);
     const db = await instance.init();
     return db;
@@ -38,11 +42,16 @@ class DB {
         reject(new Error(`open db error: ${request.error}`));
       };
       request.onupgradeneeded = () => {
+        console.log('onupgradeneeded');
         this.client = request.result;
         this.client.onerror = event => {
           throw new Error(`open db error: ${event.target}`);
         };
         this.initStores(resolve);
+      };
+      request.onsuccess = () => {
+        window.client = request.result;
+        console.log('onsuccess', request);
       };
     });
   }
@@ -56,6 +65,10 @@ class DB {
 
   initStores(resolve: (value: IDBDatabase | PromiseLike<IDBDatabase>) => void): void {
     const client = this.getClient();
+    if (client.objectStoreNames.contains('dicom')) {
+      resolve(client);
+      return;
+    }
     const objectStore = client.createObjectStore('dicom', { keyPath: 'id' });
     objectStore.createIndex('seriesId', 'seriesId', { unique: false });
     objectStore.transaction.oncomplete = () => {
