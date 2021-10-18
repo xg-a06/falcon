@@ -1,4 +1,4 @@
-import Transform from '../helper/transform';
+import Transform from '@src/helper/transform';
 
 type ElmSize = {
   width: number;

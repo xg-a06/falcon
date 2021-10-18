@@ -1,12 +1,21 @@
+interface TableOptions {
+  name: string;
+  option: { keyPath: string };
+  indexs: Array<{ key: string; option: { unique: boolean } }>;
+}
+
 interface DBOptions {
   name: string;
   version: number;
+  tables: Array<TableOptions>;
 }
+
 declare global {
   interface Window {
     client: any;
   }
 }
+
 class DB {
   private indexDB = window.indexedDB;
 
@@ -29,13 +38,13 @@ class DB {
     this.request = this.indexDB.open(name, version);
   }
 
-  static async getInstance(options: DBOptions): Promise<IDBDatabase> {
+  static async init(options: DBOptions): Promise<IDBDatabase> {
     const instance = new DB(options);
     const db = await instance.init();
     return db;
   }
 
-  init(): Promise<IDBDatabase> {
+  async init(): Promise<IDBDatabase> {
     return new Promise((resolve, reject) => {
       const { request } = this;
       request.onerror = () => {
