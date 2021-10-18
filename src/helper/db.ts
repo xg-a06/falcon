@@ -1,15 +1,14 @@
-interface TableOptions {
+export interface StoreOption {
   name: string;
   option: { keyPath: string };
   indexs: Array<{ key: string; option: { unique: boolean } }>;
 }
 
-interface DBOptions {
+export interface DBOptions {
   name: string;
   version: number;
-  tables: Array<TableOptions>;
+  stores: Array<StoreOption>;
 }
-
 declare global {
   interface Window {
     client: any;
@@ -23,8 +22,6 @@ class DB {
 
   private IDBKeyRange = window.IDBKeyRange;
 
-  request: IDBOpenDBRequest;
-
   client: IDBDatabase | undefined;
 
   name: string;
@@ -35,54 +32,61 @@ class DB {
     const { name, version = 1 } = options;
     this.name = name;
     this.version = version;
-    this.request = this.indexDB.open(name, version);
   }
 
-  static async init(options: DBOptions): Promise<IDBDatabase> {
+  static async init(options: DBOptions): Promise<DB> {
     const instance = new DB(options);
-    const db = await instance.init();
+    const db = await instance.init(options.stores);
     return db;
   }
 
-  async init(): Promise<IDBDatabase> {
+  async init(stores: Array<StoreOption>): Promise<DB> {
     return new Promise((resolve, reject) => {
-      const { request } = this;
-      request.onerror = () => {
-        reject(new Error(`open db error: ${request.error}`));
+      const { name, version } = this;
+      const request = this.indexDB.open(name, version);
+
+      request.onerror = event => {
+        reject(new Error(`open db error: ${event.target}`));
       };
+
       request.onupgradeneeded = () => {
-        console.log('onupgradeneeded');
         this.client = request.result;
         this.client.onerror = event => {
-          throw new Error(`open db error: ${event.target}`);
+          throw new Error(`operate db error: ${event.target}`);
         };
-        this.initStores(resolve);
+        this.initStores(stores);
       };
+
       request.onsuccess = () => {
-        window.client = request.result;
-        console.log('onsuccess', request);
+        this.client = request.result;
+        resolve(this);
       };
     });
   }
 
-  getClient(): IDBDatabase {
+  private getClient(): IDBDatabase {
     if (this.client === undefined) {
       throw new Error('get db client error');
     }
     return this.client;
   }
 
-  initStores(resolve: (value: IDBDatabase | PromiseLike<IDBDatabase>) => void): void {
+  initStores(stores: Array<StoreOption>): void {
     const client = this.getClient();
-    if (client.objectStoreNames.contains('dicom')) {
-      resolve(client);
-      return;
-    }
-    const objectStore = client.createObjectStore('dicom', { keyPath: 'id' });
-    objectStore.createIndex('seriesId', 'seriesId', { unique: false });
-    objectStore.transaction.oncomplete = () => {
-      resolve(client);
-    };
+    stores.forEach((store: StoreOption) => {
+      const { name, option, indexs } = store;
+      if (!client.objectStoreNames.contains(name)) {
+        const objectStore = client.createObjectStore(name, option);
+        indexs.forEach(index => {
+          const { key, option: indexOption } = index;
+          objectStore.createIndex(key, key, indexOption);
+        });
+      }
+    });
+
+    // objectStore.transaction.oncomplete = () => {
+    //   resolve(client);
+    // };
   }
 }
 

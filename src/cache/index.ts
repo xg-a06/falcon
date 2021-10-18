@@ -1,33 +1,33 @@
-import DB from '@src/helper/db';
+import DB, { DBOptions, StoreOption } from '@src/helper/db';
+
+const stores: Array<StoreOption> = [
+  {
+    name: 'dicom',
+    option: { keyPath: 'id' },
+    indexs: [
+      {
+        key: 'id',
+        option: {
+          unique: true,
+        },
+      },
+    ],
+  },
+];
+
+const dbOptions: DBOptions = {
+  name: 'viewer_cache',
+  version: 1, // 版本号
+  stores,
+};
 
 let instance: any;
 
-const getCacheInstance = () => {
+const getCacheInstance = async (): Promise<DB> => {
   if (instance === undefined) {
-    await DB.init({
-      dbName: 'books', // 数据库名称
-      version: 1, // 版本号
-      tables: [
-        {
-          tableName: 'bookrackList', // 表名
-          option: { keyPath: 'id', autoIncrement: true }, // 指明主键为id
-          indexs: [
-            // 数据库索引
-            {
-              key: 'id',
-              option: {
-                unique: true,
-              },
-            },
-            {
-              key: 'name',
-            },
-          ],
-        },
-      ],
-    });
+    await DB.init(dbOptions);
   }
   return instance;
 };
 
-export default getCacheInstance();
+export default getCacheInstance;
