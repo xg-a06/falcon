@@ -3,12 +3,18 @@ import DB, { DBOptions, StoreOption } from '@src/helper/db';
 const stores: Array<StoreOption> = [
   {
     name: 'dicom',
-    option: { keyPath: 'id' },
+    option: { autoIncrement: true },
     indexs: [
       {
-        key: 'id',
+        key: 'seriesId',
         option: {
-          unique: true,
+          unique: false,
+        },
+      },
+      {
+        key: 'studyId',
+        option: {
+          unique: false,
         },
       },
     ],
@@ -21,11 +27,11 @@ const dbOptions: DBOptions = {
   stores,
 };
 
-let instance: any;
+let instance: DB;
 
 const getCacheInstance = async (): Promise<DB> => {
   if (instance === undefined) {
-    await DB.init(dbOptions);
+    instance = await DB.init(dbOptions);
   }
   return instance;
 };

@@ -1,12 +1,7 @@
-interface LoaderOptions={
-
-}
+interface LoaderOptions {}
 
 class Loader {
-
-  constructor(options:LoaderOptions){
-
-  }
+  constructor(options: LoaderOptions) {}
 }
 
 export default Loader;
