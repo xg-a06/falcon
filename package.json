@@ -79,6 +79,7 @@
   },
   "dependencies": {
     "@types/gl-matrix": "^3.2.0",
-    "gl-matrix": "^3.4.3"
+    "gl-matrix": "^3.4.3",
+    "promise-worker": "^2.0.1"
   }
 }

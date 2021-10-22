@@ -28,6 +28,7 @@ module.exports = {
     'import/extensions': 0,
     'import/prefer-default-export': 0,
     'no-debugger': 0,
+    'import/no-webpack-loader-syntax': 0,
   },
   globals: {},
 };

@@ -1,7 +1,7 @@
-export interface InitOptions {}
+// export interface InitOptions {}
 
-function init(options: InitOptions) {
-  const viewports=
-}
+// function init(options: InitOptions) {
+//   // const viewports=
+// }
 
-export default init;
+// export default init;

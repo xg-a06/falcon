@@ -82,7 +82,6 @@ class Base2D {
     canvas.width = width;
     canvas.height = height;
     this.elm.appendChild(canvas);
-
     return canvas;
   }
 

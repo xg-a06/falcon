@@ -1,9 +1,22 @@
+/* eslint-disable import/no-unresolved */
+// import PromiseWorker from 'promise-worker';
 import DB, { DBOptions, StoreOption } from '@src/helper/db';
+import LoaderWorker from 'worker-loader!@src/loader/loader.worker';
+
+const worker = new LoaderWorker();
+console.log(worker);
+
+worker.postMessage({ a: 1 });
+
+worker.onmessage = event => {
+  console.log(event);
+};
 
 const stores: Array<StoreOption> = [
   {
     name: 'dicom',
-    option: { autoIncrement: true },
+    // option: { autoIncrement: true },
+    option: { keyPath: 'id' },
     indexs: [
       {
         key: 'seriesId',
