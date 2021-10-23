@@ -4,10 +4,14 @@ registerPromiseWorker(message => {
   console.log(message);
   return 'pong';
 });
-// const ctx: Worker = self as any;
 
-// // Post data to parent thread
-// ctx.postMessage({ foo: 'foo' });
-// console.log('123333');
-// // Respond to message from parent thread
-// ctx.addEventListener('message', event => console.log(event.data));
+class WebpackWorker extends Worker {
+  constructor() {
+    super('');
+    console.log('init');
+  }
+}
+
+// Uncomment this if you set the `esModule` option to `false`
+// export = WebpackWorker;
+export default WebpackWorker;

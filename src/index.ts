@@ -1,3 +1,3 @@
 import getCacheInstance from './cache/index';
 
-export { getCacheInstance };
+export default getCacheInstance;

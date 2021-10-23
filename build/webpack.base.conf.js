@@ -21,7 +21,7 @@ const baseConfig = {
   mode: isProd ? 'production' : 'development',
   devtool: isProd ? false : 'source-map',
   entry: {
-    index: resolve('src/index.ts'),
+    index: [resolve('src/index.ts')],
   },
   output: {
     filename: '[name].js',

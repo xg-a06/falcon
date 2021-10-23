@@ -1,4 +1,4 @@
-import { getCacheInstance } from '../../dist';
+import getCacheInstance from '../../dist';
 
 console.log(getCacheInstance);
 

@@ -1,6 +1,6 @@
 const { resolve } = require('./tools');
 const config = {
-  buildDetail: true,
+  buildDetail: false,
   devServer: {
     contentBase: resolve('dist'),
     port: 2233,
