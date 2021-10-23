@@ -1,16 +1,19 @@
 /* eslint-disable import/no-unresolved */
 // import PromiseWorker from 'promise-worker';
 import DB, { DBOptions, StoreOption } from '@src/helper/db';
-import LoaderWorker from 'worker-loader!@src/loader/loader.worker';
+// import LoaderWorker from '@src/loader/loader.worker.ts';
 
-const worker = new LoaderWorker();
-console.log(worker);
-
-worker.postMessage({ a: 1 });
-
-worker.onmessage = event => {
-  console.log(event);
-};
+// const worker = new LoaderWorker();
+// console.log(worker);
+// const promiseWorker = new PromiseWorker(worker);
+// promiseWorker
+//   .postMessage('ping')
+//   .then(response => {
+//     console.log(response);
+//   })
+//   .catch(error => {
+//     // handle error
+//   });
 
 const stores: Array<StoreOption> = [
   {

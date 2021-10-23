@@ -1,12 +1,10 @@
-/* eslint-disable import/no-unresolved */
-/* eslint-disable import/no-webpack-loader-syntax */
-import PromiseWorker from 'promise-worker';
-import LoaderWorker from 'worker-loader!./loader.worker';
+// import PromiseWorker from 'promise-worker';
+// import LoaderWorker from 'worker-loader!./loader.worker';
 import getCacheInstance from '@src/cache';
-import { ImageData } from '@src/loader/imageData';
+// import { ImageData } from '@src/loader/imageData';
 
-const worker = new Worker('');
-const promiseWorker = new PromiseWorker(worker);
+// const worker = new Worker('');
+// const promiseWorker = new PromiseWorker(worker);
 
 interface Tasks {
   studyId: string;
@@ -35,7 +33,7 @@ function instanceOfTask(object: any): object is Tasks {
   return 'urls' in object;
 }
 
-interface LoaderOptions {}
+// interface LoaderOptions {}
 
 class Loader {
   dataMap: DataMap = {};
@@ -44,9 +42,7 @@ class Loader {
 
   workders: Array<Worker> = [];
 
-  constructor(options: LoaderOptions) {
-    console.log(LoaderWorker);
-  }
+  // constructor(options: LoaderOptions) {}
 
   addTasks(tasks: Tasks): void;
 

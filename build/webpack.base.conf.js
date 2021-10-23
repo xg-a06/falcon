@@ -14,6 +14,9 @@ threadLoader.warmup(
 );
 
 const baseConfig = {
+  // experiments: {
+  //   outputModule: true,
+  // },
   target: 'web',
   mode: isProd ? 'production' : 'development',
   devtool: isProd ? false : 'source-map',
@@ -36,6 +39,17 @@ const baseConfig = {
   module: {
     rules: [
       {
+        test: /\.worker\.ts$/,
+        use: [
+          {
+            loader: 'worker-loader',
+            options: { inline: 'no-fallback' },
+          },
+          'babel-loader?cacheDirectory=true',
+        ],
+        include: [resolve('src')],
+      },
+      {
         test: /\.[t|j]s?$/,
         // loader: 'babel-loader',
         use: [
@@ -49,14 +63,6 @@ const baseConfig = {
           'babel-loader?cacheDirectory=true',
         ],
         include: [resolve('src'), resolve('demo')],
-      },
-      {
-        test: /\.worker\.ts$/,
-        use: {
-          loader: 'worker-loader',
-          options: { inline: 'fallback' },
-        },
-        include: [resolve('src')],
       },
     ],
   },

@@ -1,4 +1,6 @@
-import getCacheInstance from '@src/cache';
+import { getCacheInstance } from '../../dist';
+
+console.log(getCacheInstance);
 
 async function test() {
   const db = await getCacheInstance();

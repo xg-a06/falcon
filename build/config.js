@@ -1,6 +1,6 @@
 const { resolve } = require('./tools');
 const config = {
-  buildDetail: false,
+  buildDetail: true,
   devServer: {
     contentBase: resolve('dist'),
     port: 2233,
@@ -24,12 +24,6 @@ const config = {
     },
   },
   local: {
-    API_PATH: '/api',
-  },
-  dev: {
-    API_PATH: '/api',
-  },
-  test: {
     API_PATH: '/api',
   },
   prod: {

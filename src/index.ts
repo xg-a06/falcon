@@ -1,6 +1,3 @@
-import { sum, minus } from './module';
+import getCacheInstance from './cache/index';
 
-export default {
-  sum,
-  minus,
-};
+export { getCacheInstance };

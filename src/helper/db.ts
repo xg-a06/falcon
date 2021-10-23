@@ -16,11 +16,11 @@ declare global {
 }
 
 class DB {
-  private indexDB = window.indexedDB;
+  indexDB = window.indexedDB;
 
-  private IDBTransaction = window.IDBTransaction;
+  IDBTransaction = window.IDBTransaction;
 
-  private IDBKeyRange = window.IDBKeyRange;
+  IDBKeyRange = window.IDBKeyRange;
 
   client: IDBDatabase | undefined;
 
@@ -28,7 +28,7 @@ class DB {
 
   version: number;
 
-  private constructor(options: DBOptions) {
+  constructor(options: DBOptions) {
     const { name, version = 1 } = options;
     this.name = name;
     this.version = version;

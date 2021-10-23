@@ -8,11 +8,10 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "cross-env NODE_ENV=local BUILD_ENV=local webpack-dev-server --config build/webpack.dev.conf.js",
-    "prebuild:prod": "rimraf ./dist",
-    "build:dev": "cross-env NODE_ENV=development BUILD_ENV=dev node build/build.js",
-    "build:test": "cross-env NODE_ENV=development BUILD_ENV=test node build/build.js",
+    "build": "npm run build:clean && npm run build:types && npm run build:prod",
+    "build:clean": "rimraf ./dist",
+    "build:types": "tsc -p ./src --emitDeclarationOnly",
     "build:prod": "cross-env NODE_ENV=production BUILD_ENV=prod node build/build.js",
-    "build:types": "tsc --emitDeclarationOnly",
     "lint": "eslint --ext .js --ext .jsx --ext .vue src/",
     "lint:fix": "eslint --fix --ext .js --ext .jsx --ext .vue src/",
     "server": "a06-server kill all && a06-server start -r ./dist -z -c"
@@ -49,7 +48,7 @@
     "@babel/plugin-transform-runtime": "^7.13.10",
     "@babel/preset-env": "^7.13.10",
     "@babel/preset-typescript": "^7.13.0",
-    "@babel/runtime-corejs2": "^7.13.10",
+    "@babel/runtime-corejs2": "^7.15.4",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "babel-eslint": "^10.0.1",
@@ -71,10 +70,11 @@
     "thread-loader": "^3.0.4",
     "typescript": "^4.2.3",
     "webpack": "^5.25.0",
-    "webpack-bundle-analyzer": "^4.4.0",
+    "webpack-bundle-analyzer": "^4.5.0",
     "webpack-cli": "^3.3.12",
     "webpack-dev-server": "^3.11.2",
     "webpack-merge": "^5.7.3",
+    "webpack-node-externals": "^3.0.0",
     "worker-loader": "^3.0.8"
   },
   "dependencies": {

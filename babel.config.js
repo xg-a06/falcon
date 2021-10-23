@@ -3,16 +3,12 @@ module.exports = {
     [
       '@babel/preset-env',
       {
-        targets: 'chrome>=49',
+        modules: false,
         useBuiltIns: 'usage',
-        corejs: {
-          version: 2,
-          proposals: true, // 使用尚在“提议”阶段特性的 polyfill
-        }
+        corejs: 2,
       },
     ],
     '@babel/preset-typescript',
-    
   ],
   plugins: [
     ['@babel/plugin-transform-runtime', { corejs: 2 }],

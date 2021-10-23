@@ -1,6 +1,8 @@
 const chalk = require('chalk');
 const { merge } = require('webpack-merge');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const TerserPlugin = require('terser-webpack-plugin');
+const config = require('./config');
 const ProgressBarPlugin = require('progress-bar-webpack-plugin');
 const baseConfig = require('./webpack.base.conf');
 
@@ -24,5 +26,11 @@ const prodConfig = {
     }),
   ],
 };
-
+if (config.buildDetail) {
+  prodConfig.plugins.push(
+    new BundleAnalyzerPlugin({
+      analyzerPort: 8899,
+    }),
+  );
+}
 module.exports = merge(baseConfig, prodConfig);
