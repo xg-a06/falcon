@@ -1,3 +1,3 @@
-import getCacheInstance from './cache/index';
+import Loader from '@src/loader';
 
-export default getCacheInstance;
+export default Loader;

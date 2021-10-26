@@ -1,9 +1,6 @@
 import registerPromiseWorker from 'promise-worker/register';
 
-registerPromiseWorker(message => {
-  console.log(message);
-  return 'pong';
-});
+registerPromiseWorker(message => message);
 
 class WebpackWorker extends Worker {
   constructor() {

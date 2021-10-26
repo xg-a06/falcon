@@ -45,14 +45,14 @@ class DB {
       const { name, version } = this;
       const request = this.indexDB.open(name, version);
 
-      request.onerror = event => {
-        reject(new Error(`open db error: ${event.target}`));
+      request.onerror = (e: any) => {
+        reject(new Error(`open db error: ${e.target.error.message}`));
       };
 
       request.onupgradeneeded = () => {
         this.client = request.result;
-        this.client.onerror = event => {
-          throw new Error(`operate db error: ${event.target}`);
+        this.client.onerror = (e: any) => {
+          throw new Error(`operate db error: ${e.target.error.message}`);
         };
         this.initStores(stores);
       };
@@ -118,8 +118,8 @@ class DB {
       transaction.oncomplete = () => {
         resolve();
       };
-      transaction.onerror = e => {
-        reject(new Error(`query index error ${e}`));
+      transaction.onerror = (e: any) => {
+        reject(reject(new Error(`query index error ${e.target.error.message}`)));
       };
     });
   }
@@ -144,6 +144,21 @@ class DB {
       };
       transaction.oncomplete = () => {
         resolve();
+      };
+    });
+  }
+
+  queryByKeyPath<T>(storeName: string, conds: any): Promise<T> {
+    return new Promise((resolve, reject) => {
+      const client = this.getClient();
+      const transaction = client.transaction(storeName, 'readonly');
+      const store = transaction.objectStore(storeName);
+      const query = store.get(conds);
+      query.onsuccess = (e: any) => {
+        resolve(e.target.result);
+      };
+      query.onerror = (e: any) => {
+        reject(new Error(`query index error ${e.target.error.message}`));
       };
     });
   }

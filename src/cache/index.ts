@@ -1,24 +1,10 @@
-import PromiseWorker from 'promise-worker';
 import DB, { DBOptions, StoreOption } from '@src/helper/db';
-import LoaderWorker from '@src/loader/loader.worker';
-
-const worker = new LoaderWorker();
-console.log(worker);
-const promiseWorker = new PromiseWorker(worker);
-promiseWorker
-  .postMessage('ping')
-  .then(response => {
-    console.log(response);
-  })
-  .catch(error => {
-    console.log(error);
-  });
 
 const stores: Array<StoreOption> = [
   {
     name: 'dicom',
     // option: { autoIncrement: true },
-    option: { keyPath: 'id' },
+    option: { keyPath: 'imageId' },
     indexs: [
       {
         key: 'seriesId',
