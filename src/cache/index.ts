@@ -11,7 +11,7 @@ promiseWorker
     console.log(response);
   })
   .catch(error => {
-    // handle error
+    console.log(error);
   });
 
 const stores: Array<StoreOption> = [
