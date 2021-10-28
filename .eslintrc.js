@@ -31,6 +31,7 @@ module.exports = {
     'no-debugger': 0,
     'import/no-webpack-loader-syntax': 0,
     'no-param-reassign': 0,
+    'no-plusplus': 0,
   },
   globals: {},
 };

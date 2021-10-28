@@ -3,6 +3,7 @@ const config = {
   buildDetail: false,
   devServer: {
     contentBase: resolve('dist'),
+    useLocalIp: true,
     port: 2233,
     open: true,
     hot: true,

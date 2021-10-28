@@ -16,11 +16,11 @@ declare global {
 }
 
 class DB {
-  indexDB = window.indexedDB;
+  indexDB = indexedDB;
 
-  IDBTransaction = window.IDBTransaction;
+  IDBTransaction = IDBTransaction;
 
-  IDBKeyRange = window.IDBKeyRange;
+  IDBKeyRange = IDBKeyRange;
 
   client: IDBDatabase | undefined;
 

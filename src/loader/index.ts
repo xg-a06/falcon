@@ -1,5 +1,6 @@
 import PromiseWorker from 'promise-worker';
 import LoaderWorker from '@src/loader/loader.worker';
+import CacheWorker from '@src/loader/cache.worker';
 import getCacheInstance from '@src/cache';
 // import { ImageData } from '@src/loader/imageData';
 
@@ -10,6 +11,7 @@ export interface Tasks {
 }
 
 interface Download {
+  studyId: string;
   seriesId: string;
   url: string;
 }
@@ -48,10 +50,14 @@ class Loader {
 
   workders: Array<IWorker> = [];
 
+  cacheWorker: PromiseWorker;
+
   options: LoaderOptions = defaultOptions;
 
   constructor(options?: LoaderOptions) {
     this.options = { ...this.options, ...options };
+
+    this.cacheWorker = new PromiseWorker(new CacheWorker());
   }
 
   addTasks(tasks: Tasks): void;
@@ -84,13 +90,18 @@ class Loader {
     return undefined;
   }
 
+  async clearCache(): Promise<void> {
+    const instance = await getCacheInstance();
+    instance.clear('dicom');
+  }
+
   async getCacheData<T>(query: QueryObj): Promise<T | undefined> {
     const { seriesId, index } = query;
     if (!this.dataMap[seriesId]) {
       return undefined;
     }
     const { downloadQueue } = this;
-    const { data } = this.dataMap[seriesId];
+    const { data, studyId } = this.dataMap[seriesId];
     const url = [...data.keys()][index];
     // 查询indexdb返回数据结果
     const instance = await getCacheInstance();
@@ -100,7 +111,7 @@ class Loader {
       return result;
     }
     // 不在缓存里那就加入下载队列开始下载
-    downloadQueue.push({ seriesId, url });
+    downloadQueue.push({ studyId, seriesId, url });
     this.work();
     return undefined;
   }
@@ -120,22 +131,21 @@ class Loader {
     const download = downloadQueue.shift()!;
 
     const { seriesId, url } = download;
-
     worker.isWorking = true;
     const res = await worker.postMessage(download);
-    const db = await getCacheInstance();
     if (!this.dataMap[seriesId]) {
       return;
     }
-    this.dataMap[seriesId].data.set(url, true);
-    await db.insert('dicom', { imageId: '123', ...res });
+    const { studyId, data } = this.dataMap[seriesId];
+    data.set(url, true);
+    this.cacheWorker.postMessage({ studyId, seriesId, url, data: res });
     worker.isWorking = false;
     this.work();
   }
 
   work(): void {
     const { options, workders } = this;
-    if (workders.length < options.workerMaxCount) {
+    if (workders.length < options.workerMaxCount && workders.every(w => w.isWorking)) {
       this.initWorker();
     }
     this.workders.forEach(worker => {
