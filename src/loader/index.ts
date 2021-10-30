@@ -1,4 +1,3 @@
-import PromiseWorker from 'promise-worker';
 import LoaderWorker from '@src/loader/loader.worker';
 import CacheWorker from '@src/loader/cache.worker';
 import getCacheInstance from '@src/cache';
@@ -9,13 +8,6 @@ export interface Tasks {
   seriesId: string;
   urls: Array<string>;
 }
-
-interface Download {
-  studyId: string;
-  seriesId: string;
-  url: string;
-}
-
 interface DataMap {
   [key: string]: {
     studyId: string;
@@ -23,41 +15,48 @@ interface DataMap {
   };
 }
 
+interface CacheGroup {
+  [key: string]: Array<any>;
+}
 export interface QueryObj {
   seriesId: string;
-  index: number;
+  value: any;
 }
 
 function instanceOfTask(object: any): object is Tasks {
   return 'urls' in object;
 }
 
-interface IWorker extends PromiseWorker {
-  isWorking: boolean;
-}
-
 interface LoaderOptions {
-  workerMaxCount: number;
+  downloadWorkerMaxCount?: number;
+  cacheWorkerMaxCount?: number;
 }
 
 const defaultOptions: LoaderOptions = {
-  workerMaxCount: navigator.hardwareConcurrency,
+  downloadWorkerMaxCount: 1,
+  cacheWorkerMaxCount: 1,
 };
 class Loader {
   dataMap: DataMap = {};
 
-  downloadQueue: Array<Download> = [];
+  downloadWorkder: Worker;
 
-  workders: Array<IWorker> = [];
-
-  cacheWorker: PromiseWorker;
+  cacheWorker: Worker;
 
   options: LoaderOptions = defaultOptions;
+
+  channel: MessageChannel;
+
+  cacheGroup: CacheGroup = {};
 
   constructor(options?: LoaderOptions) {
     this.options = { ...this.options, ...options };
 
-    this.cacheWorker = new PromiseWorker(new CacheWorker());
+    this.channel = new MessageChannel();
+
+    this.downloadWorkder = this.initDownloadWorker();
+    this.cacheWorker = this.initCacheWorker();
+    this.clearCache();
   }
 
   addTasks(tasks: Tasks): void;
@@ -74,18 +73,15 @@ class Loader {
     tmp.forEach(task => {
       const { studyId, seriesId, urls } = task;
       if (!this.dataMap[seriesId]) {
+        const data = new Map<string, boolean>();
+        urls.forEach(url => {
+          data.set(url, false);
+        });
         this.dataMap[seriesId] = {
           studyId,
-          data: new Map<string, boolean>(),
+          data,
         };
       }
-
-      const { data } = this.dataMap[seriesId];
-      urls.forEach(url => {
-        if (!data.has(url)) {
-          data.set(url, false);
-        }
-      });
     });
     return undefined;
   }
@@ -95,64 +91,56 @@ class Loader {
     instance.clear('dicom');
   }
 
+  // async getCacheDataBySeriesId<T>(query: QueryObj): Promise<Array<T> | undefined> {
+  //   const { seriesId, value } = query;
+  //   if (!this.dataMap[seriesId]) {
+  //     return undefined;
+  //   }
+  //   const cacheResult = this.cacheGroup[seriesId];
+  //   if (cacheResult) {
+  //     return cacheResult;
+  //   }
+  //   const {data}=this.dataMap[seriesId];
+  //   const instance = await getCacheInstance();
+  //   const result = await instance.queryByIndex<T>('dicom', seriesId, value);
+  //   if (result&&data.size===result.length) {
+  //     this.cacheGroup[seriesId] = result;
+  //     return result;
+  //   }
+  // }
+
   async getCacheData<T>(query: QueryObj): Promise<T | undefined> {
-    const { seriesId, index } = query;
+    const { seriesId, value } = query;
     if (!this.dataMap[seriesId]) {
       return undefined;
     }
-    const { downloadQueue } = this;
+    const { downloadWorkder } = this;
     const { data, studyId } = this.dataMap[seriesId];
-    const url = [...data.keys()][index];
-    // 查询indexdb返回数据结果
-    const instance = await getCacheInstance();
-    const result = await instance.queryByKeyPath<T>('dicom', url);
-
-    if (result) {
-      return result;
-    }
-    // 不在缓存里那就加入下载队列开始下载
-    downloadQueue.push({ studyId, seriesId, url });
-    this.work();
+    const url = [...data.keys()][value];
+    // const instance = await getCacheInstance();
+    // const result = await instance.queryByKeyPath<T>('dicom', url);
+    // if (result) {
+    //   return result;
+    // }
+    downloadWorkder.postMessage({ studyId, seriesId, url });
     return undefined;
   }
 
-  initWorker(): void {
+  // 初始化下载线程
+  initDownloadWorker(): Worker {
+    const { channel } = this;
     const worker = new LoaderWorker();
-    const promiseWorker = new PromiseWorker(worker) as IWorker;
-    promiseWorker.isWorking = false;
-    this.workders.push(promiseWorker);
+    worker.postMessage('init', [channel.port1]);
+    // worker.onmessage = e => {};
+    return worker;
   }
 
-  async doWork(worker: IWorker): Promise<void> {
-    const { downloadQueue } = this;
-    if (downloadQueue.length === 0) {
-      return;
-    }
-    const download = downloadQueue.shift()!;
-
-    const { seriesId, url } = download;
-    worker.isWorking = true;
-    const res = await worker.postMessage(download);
-    if (!this.dataMap[seriesId]) {
-      return;
-    }
-    const { studyId, data } = this.dataMap[seriesId];
-    data.set(url, true);
-    this.cacheWorker.postMessage({ studyId, seriesId, url, data: res });
-    worker.isWorking = false;
-    this.work();
-  }
-
-  work(): void {
-    const { options, workders } = this;
-    if (workders.length < options.workerMaxCount && workders.every(w => w.isWorking)) {
-      this.initWorker();
-    }
-    this.workders.forEach(worker => {
-      if (!worker.isWorking) {
-        this.doWork(worker);
-      }
-    });
+  // 初始化缓存线程
+  initCacheWorker(): Worker {
+    const { channel } = this;
+    const worker = new CacheWorker();
+    worker.postMessage('init', [channel.port2]);
+    return worker;
   }
 }
 

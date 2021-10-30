@@ -1,0 +1,3 @@
+interface Window {
+  loader: any;
+}

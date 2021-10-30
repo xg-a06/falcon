@@ -112,7 +112,6 @@ class DB {
       if (!(data instanceof Array)) {
         values = [data];
       }
-
       values.forEach((v: any) => store.add(v));
 
       transaction.oncomplete = () => {

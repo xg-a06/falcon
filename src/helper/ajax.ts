@@ -70,6 +70,10 @@ class AJAX {
     }
   }
 
+  abort(): void {
+    this.xhr?.abort();
+  }
+
   open(): void {
     const { method, url, async } = this.options;
     this.getXHR().open(method, url, async);
@@ -108,7 +112,7 @@ class AJAX {
     };
   }
 
-  request(): Promise<void> {
+  request(): Promise<any> {
     return new Promise((resolve, reject) => {
       this.xhr = new XMLHttpRequest();
       this.init();
@@ -126,7 +130,7 @@ const ajax = (options: Partial<AJAXOptions>): Promise<any> => {
   return xhr.request();
 };
 
-ajax.create = (options: AJAXOptions): AJAX => {
+ajax.create = (options: Partial<AJAXOptions>): AJAX => {
   const op = { ...defaultOptions, ...options };
   return new AJAX(op);
 };

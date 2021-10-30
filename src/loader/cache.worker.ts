@@ -1,12 +1,30 @@
-/* eslint-disable import/no-mutable-exports */
-import registerPromiseWorker from 'promise-worker/register';
+/* eslint-disable no-restricted-globals */
 import getCacheInstance from '@src/cache';
+import { debounce } from '@src/helper/tools';
 
-registerPromiseWorker(async message => {
-  const { studyId, seriesId, url, data } = message;
+let port2: MessagePort;
+
+const cache = {
+  queue: [] as Array<any>,
+};
+
+const doCache = debounce(async (target: any) => {
+  const { queue: data } = target;
+  cache.queue = [];
   const db = await getCacheInstance();
-  await db.insert('dicom', { imageId: url, studyId, seriesId, data });
-  return false;
+  await db.insert('dicom', data);
+  console.log('over');
+}, 16);
+
+const ctx: Worker = self as any;
+
+ctx.addEventListener('message', async e => {
+  [port2] = e.ports;
+  port2.onmessage = async message => {
+    const { data } = message;
+    cache.queue.push(data);
+    doCache(cache);
+  };
 });
 
 // 简单处理worker引入问题

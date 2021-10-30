@@ -1,13 +1,18 @@
-/* eslint-disable import/no-mutable-exports */
-import registerPromiseWorker from 'promise-worker/register';
+/* eslint-disable no-restricted-globals */
 import ajax from '../helper/ajax';
+
+let port1: MessagePort;
+const xhrs: Array<any> = [];
+const ctx: Worker = self as any;
 
 const loadImage = async (url: string): Promise<any> => {
   let image = null;
-  const { code, data } = await ajax({
+  const xhr = ajax.create({
     url,
     responseType: 'arraybuffer',
   });
+  xhrs.push(xhr);
+  const { code, data } = await xhr.request();
   if (code === 200) {
     image = data;
     return image;
@@ -23,13 +28,23 @@ const retryLoadImage = (url: string, retry = 3): Promise<any> =>
       return retry > 0 ? retryLoadImage(url, --retry) : false;
     });
 
-registerPromiseWorker(async message => {
-  const { url } = message;
+ctx.addEventListener('message', async e => {
+  if (e.data === 'init') {
+    [port1] = e.ports;
+    return;
+  }
+  if (e.data === 'abort') {
+    xhrs.forEach(xhr => xhr.abort());
+    return;
+  }
+  const { studyId, seriesId, url } = e.data;
   const image = await retryLoadImage(url);
   if (image) {
-    return image;
+    port1.postMessage({ studyId, seriesId, imageId: url, data: image });
+    ctx.postMessage(true);
+    return;
   }
-  return false;
+  ctx.postMessage(false);
 });
 
 // 简单处理worker引入问题
