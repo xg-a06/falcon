@@ -22,7 +22,7 @@ async function test() {
   const loader = new Loader();
   window.loader = loader;
   loader.addTasks(tasks);
-
+  loader.clearCache();
   document.body.addEventListener('keydown', async () => {
     if (index < length) {
       index++;

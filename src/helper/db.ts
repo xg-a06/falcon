@@ -185,6 +185,29 @@ class DB {
       };
     });
   }
+
+  count(storeName: string, indexName?: string, conds?: any): Promise<number> {
+    return new Promise((resolve, reject) => {
+      const client = this.getClient();
+      const transaction = client.transaction(storeName, 'readonly');
+      const store = transaction.objectStore(storeName);
+      let query;
+      if (indexName !== undefined && conds !== undefined) {
+        const index = store.index(indexName);
+        const range = this.IDBKeyRange.only(conds);
+        query = index.count(range);
+      } else {
+        query = store.count();
+      }
+      query.onsuccess = (e: any) => {
+        const count = e.target.result;
+        resolve(count);
+      };
+      query.onerror = e => {
+        reject(new Error(`query index error ${e}`));
+      };
+    });
+  }
 }
 
 export default DB;

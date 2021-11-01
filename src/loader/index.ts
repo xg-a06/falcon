@@ -1,3 +1,4 @@
+import 'broadcastchannel-polyfill';
 import LoaderWorker from '@src/loader/loader.worker';
 import CacheWorker from '@src/loader/cache.worker';
 import getCacheInstance from '@src/cache';
@@ -53,10 +54,10 @@ class Loader {
     this.options = { ...this.options, ...options };
 
     this.channel = new MessageChannel();
-
     this.downloadWorkder = this.initDownloadWorker();
     this.cacheWorker = this.initCacheWorker();
-    this.clearCache();
+
+    this.cleanCache();
   }
 
   addTasks(tasks: Tasks): void;
@@ -141,6 +142,24 @@ class Loader {
     const worker = new CacheWorker();
     worker.postMessage('init', [channel.port2]);
     return worker;
+  }
+
+  cleanCache(): void {
+    const broadcast = new BroadcastChannel('Viewer_Loader');
+    const timerId = setTimeout(() => {
+      console.log('清理缓存');
+      this.clearCache();
+    }, 30);
+    broadcast.onmessage = e => {
+      const { data } = e;
+      if (data === 'ping') {
+        broadcast.postMessage('pong');
+      } else if (data === 'pong') {
+        console.log('有客户端存活');
+        clearTimeout(timerId);
+      }
+    };
+    broadcast.postMessage('ping');
   }
 }
 

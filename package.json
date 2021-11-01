@@ -80,6 +80,7 @@
     "worker-loader": "^3.0.8"
   },
   "dependencies": {
+    "broadcastchannel-polyfill": "^1.0.1",
     "dicom-parser": "^1.8.11",
     "gl-matrix": "^3.4.3",
     "promise-worker": "^2.0.1",
