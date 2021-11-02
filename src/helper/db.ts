@@ -118,7 +118,7 @@ class DB {
         resolve();
       };
       transaction.onerror = (e: any) => {
-        reject(reject(new Error(`query index error ${e.target.error.message}`)));
+        reject(new Error(`query index error ${e.target.error.message}`));
       };
     });
   }

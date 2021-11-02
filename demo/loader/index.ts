@@ -16,26 +16,24 @@ const tasks: Tasks = {
   urls,
 };
 
-const { length } = urls;
-let index = 0;
+// const { length } = urls;
+// let index = 0;
 async function test() {
   const loader = new Loader();
   window.loader = loader;
   loader.addTasks(tasks);
-  loader.clearCache();
-  document.body.addEventListener('keydown', async () => {
-    if (index < length) {
-      index++;
-    } else {
-      index = 0;
-    }
-    const query: QueryObj = {
-      seriesId,
-      value: index,
-    };
-    const res: any = await loader.getCacheData(query);
-    console.log(res?.imageId);
-  });
+  // document.body.addEventListener('keydown', async () => {
+  //   if (index < length) {
+  //     index++;
+  //   } else {
+  //     index = 0;
+  //   }
+  //   const query: QueryObj = {
+  //     seriesId,
+  //     value: index,
+  //   };
+  //   const res: any = await loader.getCacheDataByIndex(query);
+  // });
 
   // document.body.addEventListener('click', async () => {
   console.time('get');
@@ -45,9 +43,13 @@ async function test() {
       seriesId,
       value: i,
     };
-    loader.getCacheData(query);
+    await loader.getCacheDataByIndex(query);
     // await sleep(30);
   }
+
+  // const res = await loader.getCacheDataBySeriesId(seriesId);
+  // console.log(res);
+
   console.timeEnd('get');
   // });
   // console.log(result);
