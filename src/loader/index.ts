@@ -1,4 +1,5 @@
 import 'broadcastchannel-polyfill';
+import PromiseWorker from 'promise-worker';
 import LoaderWorker from '@src/loader/loader.worker';
 import CacheWorker from '@src/loader/cache.worker';
 import getCacheInstance from '@src/cache';
@@ -17,7 +18,6 @@ interface TasksMap {
     urls: Array<string>;
   };
 }
-
 interface CacheGroup {
   [key: string]: Array<any>;
 }
@@ -52,13 +52,14 @@ class Loader {
 
   cacheGroup: CacheGroup = {};
 
+  instance: any;
+
   constructor(options?: LoaderOptions) {
     this.options = { ...this.options, ...options };
 
     this.channel = new MessageChannel();
     this.downloadWorkder = this.initDownloadWorker();
     this.cacheWorker = this.initCacheWorker();
-
     this.cleanCache();
   }
 
@@ -90,23 +91,23 @@ class Loader {
     instance.clear('dicom');
   }
 
-  async getCacheDataBySeriesId<T>(seriesId: string): Promise<Array<T> | undefined> {
-    if (!this.tasksMap[seriesId]) {
-      return undefined;
-    }
-    const cacheResult = this.cacheGroup[seriesId];
-    if (cacheResult) {
-      return cacheResult;
-    }
-    const { urls } = this.tasksMap[seriesId];
-    const instance = await getCacheInstance();
-    const result = await instance.queryByIndex<T>('dicom', 'seriesId', seriesId);
-    if (urls.length !== result?.length) {
-      await instance.deleteByConds('dicom', data => data.seriesId === seriesId);
-    } else {
-      return result;
-    }
-  }
+  // async getCacheDataBySeriesId<T>(seriesId: string): Promise<Array<T> | undefined> {
+  //   if (!this.tasksMap[seriesId]) {
+  //     return undefined;
+  //   }
+  //   const cacheResult = this.cacheGroup[seriesId];
+  //   if (cacheResult) {
+  //     return cacheResult;
+  //   }
+  //   const { urls } = this.tasksMap[seriesId];
+  //   const instance = await getCacheInstance();
+  //   const result = await instance.queryByIndex<T>('dicom', 'seriesId', seriesId);
+  //   if (urls.length !== result?.length) {
+  //     await instance.deleteByConds('dicom', data => data.seriesId === seriesId);
+  //   } else {
+  //     return result;
+  //   }
+  // }
 
   async getCacheDataByIndex<T>(query: QueryObj): Promise<T | undefined> {
     const { seriesId, value } = query;
@@ -121,17 +122,18 @@ class Loader {
     if (result) {
       return result;
     }
-    downloadWorkder.postMessage({ studyId, seriesId, url });
+    await downloadWorkder.postMessage({ studyId, seriesId, url });
     return undefined;
   }
 
   // 初始化下载线程
-  initDownloadWorker(): Worker {
-    const { channel } = this;
+  initDownloadWorker(): PromiseWorker {
+    // const { channel } = this;
     const worker = new LoaderWorker();
-    worker.postMessage('init', [channel.port1]);
+    const promiseWorker = new PromiseWorker(worker);
+    // worker.postMessage('init', [channel.port1]);
     // worker.onmessage = e => {};
-    return worker;
+    return promiseWorker;
   }
 
   // 初始化缓存线程
@@ -146,7 +148,7 @@ class Loader {
     const broadcast = new BroadcastChannel('Viewer_Loader');
     const timerId = setTimeout(() => {
       console.log('清理缓存');
-      // this.clearCache();
+      this.clearCache();
     }, 30);
     broadcast.onmessage = e => {
       const { data } = e;

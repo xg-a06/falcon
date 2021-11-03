@@ -1,11 +1,13 @@
 /* eslint-disable no-restricted-globals */
+import registerPromiseWorker from 'promise-worker/register';
+import getCacheInstance from '@src/cache';
 import ajax from '../helper/ajax';
 
-let port1: MessagePort;
-let workCount = 0;
+// let port1: MessagePort;
+const workCount = 0;
 const queue: Array<any> = [];
 const xhrs: Array<any> = [];
-const ctx: Worker = self as any;
+// const ctx: Worker = self as any;
 
 const loadImage = async (url: string): Promise<any> => {
   let image = null;
@@ -30,34 +32,39 @@ const retryLoadImage = (url: string, retry = 3): Promise<any> =>
       return retry > 0 ? retryLoadImage(url, --retry) : false;
     });
 
-const work = async (index: number) => {
+const work = async () => {
   if (queue.length === 0) {
     return;
   }
-  workCount++;
   const task = queue.shift();
   const { studyId, seriesId, url } = task;
   const image = await retryLoadImage(url);
-  if (image) {
-    port1.postMessage({ studyId, seriesId, imageId: url, data: image });
-  }
-  workCount--;
-  work(index);
+  // if (image) {
+  //   const db = await getCacheInstance();
+  //   await db.insert('dicom', { studyId, seriesId, imageId: url, data: image });
+  // }
+  work();
 };
 
-ctx.addEventListener('message', e => {
-  if (e.data === 'init') {
-    [port1] = e.ports;
-    return;
-  }
-  if (e.data === 'abort') {
-    xhrs.forEach(xhr => xhr.abort());
-    return;
-  }
-  queue.push(e.data);
-  if (workCount < 5) {
-    work(workCount);
-  }
+// ctx.addEventListener('message', e => {
+//   if (e.data === 'init') {
+//     [port1] = e.ports;
+//     return;
+//   }
+//   if (e.data === 'abort') {
+//     xhrs.forEach(xhr => xhr.abort());
+//     return;
+//   }
+//   queue.push(e.data);
+//   if (workCount < 5) {
+//     work(workCount);
+//   }
+// });
+
+registerPromiseWorker(message => {
+  queue.push(message);
+  work();
+  return false;
 });
 
 // 简单处理worker引入问题

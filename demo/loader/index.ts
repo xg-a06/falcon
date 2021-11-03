@@ -37,19 +37,16 @@ async function test() {
 
   // document.body.addEventListener('click', async () => {
   console.time('get');
-
   for (const [i] of urls.entries()) {
     const query: QueryObj = {
       seriesId,
       value: i,
     };
-    await loader.getCacheDataByIndex(query);
+    loader.getCacheDataByIndex(query);
     // await sleep(30);
   }
-
   // const res = await loader.getCacheDataBySeriesId(seriesId);
   // console.log(res);
-
   console.timeEnd('get');
   // });
   // console.log(result);

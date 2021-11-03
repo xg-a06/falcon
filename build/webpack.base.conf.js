@@ -62,7 +62,7 @@ const baseConfig = {
           'cache-loader',
           'babel-loader?cacheDirectory=true',
         ],
-        include: [resolve('src'), resolve('demo')],
+        include: [resolve('src'), resolve('demo'), resolve('node_modules/wslink')],
       },
     ],
   },
