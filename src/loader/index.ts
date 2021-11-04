@@ -42,7 +42,7 @@ const defaultOptions: LoaderOptions = {
 class Loader {
   tasksMap: TasksMap = {};
 
-  downloadWorkder: Worker;
+  downloadWorkder: PromiseWorker;
 
   cacheWorker: Worker;
 

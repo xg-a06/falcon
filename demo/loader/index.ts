@@ -42,14 +42,13 @@ async function test() {
       seriesId,
       value: i,
     };
-    loader.getCacheDataByIndex(query);
+    await loader.getCacheDataByIndex(query);
     // await sleep(30);
   }
   // const res = await loader.getCacheDataBySeriesId(seriesId);
   // console.log(res);
   console.timeEnd('get');
   // });
-  // console.log(result);
 }
 
 test();

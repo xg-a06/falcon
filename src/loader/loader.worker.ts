@@ -3,8 +3,7 @@ import registerPromiseWorker from 'promise-worker/register';
 import getCacheInstance from '@src/cache';
 import ajax from '../helper/ajax';
 
-// let port1: MessagePort;
-const workCount = 0;
+let isWorking = false;
 const queue: Array<any> = [];
 const xhrs: Array<any> = [];
 // const ctx: Worker = self as any;
@@ -36,14 +35,25 @@ const work = async () => {
   if (queue.length === 0) {
     return;
   }
-  const task = queue.shift();
-  const { studyId, seriesId, url } = task;
-  const image = await retryLoadImage(url);
-  // if (image) {
-  //   const db = await getCacheInstance();
-  //   await db.insert('dicom', { studyId, seriesId, imageId: url, data: image });
-  // }
-  work();
+  isWorking = true;
+  const tasks = queue.splice(0, 5);
+  const works = tasks.map(({ url }) => retryLoadImage(url));
+  const rets = await Promise.all(works);
+
+  if (rets.length > 0) {
+    const db = await getCacheInstance();
+    const datas = tasks.map(({ studyId, seriesId, url }, index) => ({
+      studyId,
+      seriesId,
+      imageId: url,
+      data: rets[index],
+    }));
+    await db.insert('dicom', datas);
+  }
+  isWorking = false;
+  if (queue.length > 0) {
+    work();
+  }
 };
 
 // ctx.addEventListener('message', e => {
@@ -61,9 +71,11 @@ const work = async () => {
 //   }
 // });
 
-registerPromiseWorker(message => {
+registerPromiseWorker(async message => {
   queue.push(message);
-  work();
+  if (!isWorking) {
+    work();
+  }
   return false;
 });
 
