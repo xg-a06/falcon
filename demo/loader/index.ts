@@ -6,9 +6,9 @@ import dataJson from './data.json';
 
 const sleep = (time: number) => new Promise(reslove => setTimeout(reslove, time));
 
-const studyId = '1.2.840.20210408.121032001017';
-const seriesId = '1.2.392.200036.9116.2.2059767860.1617866629.8.1307500001.2';
-const urls = dataJson.data.images.map(image => `http://10.0.70.3:8000/${image.storagePath}`);
+const studyId = '1.2.392.200036.9116.2.6.1.44063.1796265542.1599809555.719814';
+const seriesId = '1.2.392.200036.9116.2.1796265542.1599809941.9.1225100001.2';
+const urls = dataJson.data.images.map(image => `http://172.16.6.7:8000/${image.storagePath}`);
 
 const tasks: Tasks = {
   studyId,
@@ -36,18 +36,24 @@ async function test() {
   // });
 
   // document.body.addEventListener('click', async () => {
-  console.time('get');
-  for (const [i] of urls.entries()) {
-    const query: QueryObj = {
-      seriesId,
-      value: i,
-    };
-    await loader.getCacheDataByIndex(query);
-    // await sleep(30);
-  }
-  // const res = await loader.getCacheDataBySeriesId(seriesId);
-  // console.log(res);
-  console.timeEnd('get');
+  // console.time('get');
+  // for (const [i] of urls.entries()) {
+  //   const query: QueryObj = {
+  //     seriesId,
+  //     value: i,
+  //   };
+  await loader.getCacheDataBySeriesId(seriesId);
+  setTimeout(() => {
+    fetch('/asd');
+  }, 500);
+  setTimeout(() => {
+    fetch('/ert');
+  }, 1000);
+  //   // await sleep(30);
+  // }
+  // // const res = await loader.getCacheDataBySeriesId(seriesId);
+  // // console.log(res);
+  // console.timeEnd('get');
   // });
 }
 

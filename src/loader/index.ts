@@ -12,12 +12,7 @@ export interface Tasks {
   urls: Array<string>;
   priority?: number;
 }
-interface TasksMap {
-  [key: string]: {
-    studyId: string;
-    urls: Array<string>;
-  };
-}
+
 interface CacheGroup {
   [key: string]: Array<any>;
 }
@@ -30,6 +25,10 @@ function instanceOfTask(object: any): object is Tasks {
   return 'urls' in object;
 }
 
+interface IWorker extends PromiseWorker {
+  _worker: Worker;
+}
+
 interface LoaderOptions {
   downloadWorkerMaxCount?: number;
   cacheWorkerMaxCount?: number;
@@ -40,13 +39,11 @@ const defaultOptions: LoaderOptions = {
   cacheWorkerMaxCount: 1,
 };
 class Loader {
-  tasksMap: TasksMap = {};
-
-  downloadWorkder: PromiseWorker;
-
-  cacheWorker: Worker;
-
   options: LoaderOptions = defaultOptions;
+
+  cacheWorker: IWorker;
+
+  downloadWorkder: Worker;
 
   channel: MessageChannel;
 
@@ -63,6 +60,23 @@ class Loader {
     this.cleanCache();
   }
 
+  // 初始化缓存线程
+  initCacheWorker(): IWorker {
+    const { channel } = this;
+    const worker = new CacheWorker();
+    const promiseWorker = new PromiseWorker(worker) as IWorker;
+    promiseWorker._worker.postMessage('init', [channel.port1]);
+    return promiseWorker;
+  }
+
+  // 初始化下载线程
+  initDownloadWorker(): Worker {
+    const { channel } = this;
+    const worker = new LoaderWorker();
+    worker.postMessage('init', [channel.port2]);
+    return worker;
+  }
+
   addTasks(tasks: Tasks): void;
 
   addTasks(tasks: Array<Tasks>): void;
@@ -74,74 +88,51 @@ class Loader {
     } else {
       tmp = tasks;
     }
-    tmp.forEach(task => {
-      const { studyId, seriesId, urls } = task;
-      if (!this.tasksMap[seriesId]) {
-        this.tasksMap[seriesId] = {
-          studyId,
-          urls,
-        };
-      }
-    });
-    return undefined;
+    const { cacheWorker } = this;
+    cacheWorker.postMessage({ event: 'addTask', data: tmp });
   }
 
   async clearCache(): Promise<void> {
     const instance = await getCacheInstance();
-    instance.clear('dicom');
+    instance.clear('dicomInfo');
+    instance.clear('cacheInfo');
   }
 
-  // async getCacheDataBySeriesId<T>(seriesId: string): Promise<Array<T> | undefined> {
-  //   if (!this.tasksMap[seriesId]) {
-  //     return undefined;
-  //   }
-  //   const cacheResult = this.cacheGroup[seriesId];
-  //   if (cacheResult) {
-  //     return cacheResult;
-  //   }
-  //   const { urls } = this.tasksMap[seriesId];
-  //   const instance = await getCacheInstance();
-  //   const result = await instance.queryByIndex<T>('dicom', 'seriesId', seriesId);
-  //   if (urls.length !== result?.length) {
-  //     await instance.deleteByConds('dicom', data => data.seriesId === seriesId);
-  //   } else {
-  //     return result;
-  //   }
-  // }
+  async getCacheDataBySeriesId<T>(seriesId: string): Promise<undefined> {
+    // if (!this.tasksMap[seriesId]) {
+    //   return undefined;
+    // }
+    // const cacheResult = this.cacheGroup[seriesId];
+    // if (cacheResult) {
+    //   return cacheResult;
+    // }
+    // const { urls } = this.tasksMap[seriesId];
+    // if (urls.length !== result?.length) {
+    //   await instance.deleteByConds('dicom', data => data.seriesId === seriesId);
+    // } else {
+    //   return result;
+    // }
+    const { cacheWorker } = this;
+    await cacheWorker.postMessage({ event: 'QUERY_SERIES', data: { seriesId } });
 
-  async getCacheDataByIndex<T>(query: QueryObj): Promise<T | undefined> {
-    const { seriesId, value } = query;
-    if (!this.tasksMap[seriesId]) {
-      return undefined;
-    }
-    const { downloadWorkder } = this;
-    const { urls, studyId } = this.tasksMap[seriesId];
-    const url = urls[value];
-    const instance = await getCacheInstance();
-    const result = await instance.queryByKeyPath<T>('dicom', url);
-    if (result) {
-      return result;
-    }
-    await downloadWorkder.postMessage({ studyId, seriesId, url });
     return undefined;
   }
 
-  // 初始化下载线程
-  initDownloadWorker(): PromiseWorker {
-    // const { channel } = this;
-    const worker = new LoaderWorker();
-    const promiseWorker = new PromiseWorker(worker);
-    // worker.postMessage('init', [channel.port1]);
-    // worker.onmessage = e => {};
-    return promiseWorker;
-  }
-
-  // 初始化缓存线程
-  initCacheWorker(): Worker {
-    const { channel } = this;
-    const worker = new CacheWorker();
-    worker.postMessage('init', [channel.port2]);
-    return worker;
+  async getCacheDataByIndex<T>(query: QueryObj): Promise<T | undefined> {
+    // const { seriesId, value } = query;
+    // if (!this.tasksMap[seriesId]) {
+    //   return undefined;
+    // }
+    // const { downloadWorkder } = this;
+    // const { urls, studyId } = this.tasksMap[seriesId];
+    // const url = urls[value];
+    // const instance = await getCacheInstance();
+    // const result = await instance.queryByKeyPath<T>('dicomInfo', url);
+    // if (result) {
+    //   return result;
+    // }
+    // await downloadWorkder.postMessage({ studyId, seriesId, url });
+    return undefined;
   }
 
   cleanCache(): void {

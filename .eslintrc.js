@@ -32,6 +32,7 @@ module.exports = {
     'import/no-webpack-loader-syntax': 0,
     'no-param-reassign': 0,
     'no-plusplus': 0,
+    'no-underscore-dangle': 0,
   },
   globals: {},
 };

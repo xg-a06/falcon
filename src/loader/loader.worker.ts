@@ -1,12 +1,28 @@
 /* eslint-disable no-restricted-globals */
-import registerPromiseWorker from 'promise-worker/register';
-import getCacheInstance from '@src/cache';
+import { Tasks } from './index';
 import ajax from '../helper/ajax';
 
+interface TasksMap {
+  [key: string]: {
+    studyId: string;
+    urls: Array<string>;
+    priority?: number;
+  };
+}
+
+const queues: Record<string, Array<string>> = {
+  '0': [],
+  '1': [],
+  '2': [],
+};
+
+const tasksMap: TasksMap = {};
+
+let port2: MessagePort;
+
+const ctx: Worker = self as any;
+
 let isWorking = false;
-const queue: Array<any> = [];
-const xhrs: Array<any> = [];
-// const ctx: Worker = self as any;
 
 const loadImage = async (url: string): Promise<any> => {
   let image = null;
@@ -14,7 +30,6 @@ const loadImage = async (url: string): Promise<any> => {
     url,
     responseType: 'arraybuffer',
   });
-  xhrs.push(xhr);
   const { code, data } = await xhr.request();
   if (code === 200) {
     image = data;
@@ -31,52 +46,63 @@ const retryLoadImage = (url: string, retry = 3): Promise<any> =>
       return retry > 0 ? retryLoadImage(url, --retry) : false;
     });
 
-const work = async () => {
-  if (queue.length === 0) {
+const pickTask = () => {
+  const seriesId = queues[0][0] || queues[1][0] || queues[2][0];
+  if (seriesId) {
+    const { studyId, urls } = tasksMap[seriesId];
+    return { seriesId, studyId, urls: urls.splice(0, 6) };
+  }
+  return undefined;
+};
+
+const load = async () => {
+  if (isWorking) {
+    return;
+  }
+  const tasks = pickTask();
+  if (!tasks) {
     return;
   }
   isWorking = true;
-  const tasks = queue.splice(0, 5);
-  const works = tasks.map(({ url }) => retryLoadImage(url));
+  const { seriesId, studyId, urls } = tasks;
+  const works = urls.map(url => retryLoadImage(url));
   const rets = await Promise.all(works);
 
   if (rets.length > 0) {
-    const db = await getCacheInstance();
-    const datas = tasks.map(({ studyId, seriesId, url }, index) => ({
+    const data = rets.map((ret, index) => ({
       studyId,
       seriesId,
-      imageId: url,
-      data: rets[index],
+      imageId: urls[index],
+      data: ret,
     }));
-    await db.insert('dicom', datas);
+    port2.postMessage({ event: 'LOADED', data });
   }
   isWorking = false;
-  if (queue.length > 0) {
-    work();
-  }
+  load();
 };
 
-// ctx.addEventListener('message', e => {
-//   if (e.data === 'init') {
-//     [port1] = e.ports;
-//     return;
-//   }
-//   if (e.data === 'abort') {
-//     xhrs.forEach(xhr => xhr.abort());
-//     return;
-//   }
-//   queue.push(e.data);
-//   if (workCount < 5) {
-//     work(workCount);
-//   }
-// });
+const initEvent = (port: MessagePort) => {
+  port.onmessage = async message => {
+    console.log('loader port', message);
+    const { event, data } = message.data;
+    if (event === 'load') {
+      const { seriesId, studyId, urls, priority = 2 } = data as Tasks;
+      if (!tasksMap[seriesId]) {
+        queues[priority].push(seriesId);
+        tasksMap[seriesId] = { studyId, urls, priority };
+      }
+      load();
+    } else if (event === 'abort') {
+      console.log('abort');
+    }
+  };
+};
 
-registerPromiseWorker(async message => {
-  queue.push(message);
-  if (!isWorking) {
-    work();
+ctx.addEventListener('message', async e => {
+  if (e.data === 'init') {
+    [port2] = e.ports;
+    initEvent(port2);
   }
-  return false;
 });
 
 // 简单处理worker引入问题

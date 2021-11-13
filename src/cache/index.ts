@@ -2,7 +2,7 @@ import DB, { DBOptions, StoreOption } from '@src/helper/db';
 
 const stores: Array<StoreOption> = [
   {
-    name: 'dicom',
+    name: 'dicomInfo',
     // option: { autoIncrement: true },
     option: { keyPath: 'imageId' },
     indexs: [
@@ -20,10 +20,22 @@ const stores: Array<StoreOption> = [
       },
     ],
   },
+  {
+    name: 'cacheInfo',
+    option: { keyPath: 'seriesId' },
+    indexs: [
+      {
+        key: 'studyId',
+        option: {
+          unique: false,
+        },
+      },
+    ],
+  },
 ];
 
 const dbOptions: DBOptions = {
-  name: 'viewer_cache',
+  name: 'viewerCache',
   version: 1, // 版本号
   stores,
 };
