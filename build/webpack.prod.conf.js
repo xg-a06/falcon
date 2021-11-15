@@ -23,10 +23,10 @@ const prodConfig = {
     ],
   },
   plugins: [
-    new BundleDeclarationsWebpackPlugin.default({
-      entry: './src/index.ts',
-      outFile: 'index.d.ts',
-    }),
+    // new BundleDeclarationsWebpackPlugin.default({
+    //   entry: './src/index.ts',
+    //   outFile: 'index.d.ts',
+    // }),
     new ProgressBarPlugin({
       format: '  build [:bar] ' + chalk.green.bold(':percent') + ' (:elapsed seconds)',
     }),

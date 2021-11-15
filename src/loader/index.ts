@@ -89,7 +89,7 @@ class Loader {
       tmp = tasks;
     }
     const { cacheWorker } = this;
-    cacheWorker.postMessage({ event: 'addTask', data: tmp });
+    cacheWorker.postMessage({ event: 'ADD_TASK', data: tmp });
   }
 
   async clearCache(): Promise<void> {
@@ -113,7 +113,8 @@ class Loader {
     //   return result;
     // }
     const { cacheWorker } = this;
-    await cacheWorker.postMessage({ event: 'QUERY_SERIES', data: { seriesId } });
+    const cacheData = await cacheWorker.postMessage({ event: 'QUERY_SERIES', data: { seriesId } });
+    console.log('cacheData', cacheData);
 
     return undefined;
   }

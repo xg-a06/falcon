@@ -83,7 +83,7 @@ const load = async () => {
 
 const initEvent = (port: MessagePort) => {
   port.onmessage = async message => {
-    console.log('loader port', message);
+    // console.log('loader port', message);
     const { event, data } = message.data;
     if (event === 'load') {
       const { seriesId, studyId, urls, priority = 2 } = data as Tasks;
