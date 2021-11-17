@@ -6,9 +6,9 @@ import dataJson from './data.json';
 
 const sleep = (time: number) => new Promise(reslove => setTimeout(reslove, time));
 
-const studyId = '1.2.392.200036.9116.2.6.1.44063.1796265542.1599809555.719814';
-const seriesId = '1.2.392.200036.9116.2.1796265542.1599809941.9.1225100001.2';
-const urls = dataJson.data.images.map(image => `http://172.16.6.7:8000/${image.storagePath}`);
+const studyId = '1.2.840.20210402.121033010326';
+const seriesId = '1.2.392.200036.9116.2.2059767860.1617342761.10.1276500003.2';
+const urls = dataJson.data.images.map(image => `http://10.0.70.3:8000/${image.storagePath}`);
 
 const tasks: Tasks = {
   studyId,
@@ -41,13 +41,17 @@ async function test() {
   //     seriesId,
   //     value: i,
   //   };
-  await loader.getCacheDataBySeriesId(seriesId);
-  setTimeout(() => {
-    fetch('/asd');
-  }, 500);
-  setTimeout(() => {
-    fetch('/ert');
-  }, 1000);
+  // setTimeout(() => {
+  //   fetch('/asd');
+  // }, 500);
+  // setTimeout(() => {
+  //   fetch('/ert');
+  // }, 1000);
+  console.time('load');
+  const cacheData = await loader.getCacheDataBySeriesId(seriesId);
+  // const cacheData = await loader.getCacheDataByIndex<any>({ seriesId, value: 0 });
+  console.log('cacheData', cacheData);
+  console.timeEnd('load');
   //   // await sleep(30);
   // }
   // // const res = await loader.getCacheDataBySeriesId(seriesId);

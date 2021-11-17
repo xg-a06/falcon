@@ -2,28 +2,28 @@
 import { Tasks } from './index';
 import ajax from '../helper/ajax';
 
-interface TasksMap {
-  [key: string]: {
-    studyId: string;
-    urls: Array<string>;
-    priority?: number;
-  };
+interface queueItem {
+  seriesId: string;
+  studyId: string;
+  urls: Array<string>;
 }
 
-const queues: Record<string, Array<string>> = {
+// 任务队列
+const queues: Record<string, Array<queueItem>> = {
   '0': [],
   '1': [],
   '2': [],
 };
 
-const tasksMap: TasksMap = {};
-
+// 跟cache worker线程通信端口
 let port2: MessagePort;
 
+// 线程上下文
 const ctx: Worker = self as any;
 
 let isWorking = false;
 
+// 加载图片
 const loadImage = async (url: string): Promise<any> => {
   let image = null;
   const xhr = ajax.create({
@@ -38,6 +38,7 @@ const loadImage = async (url: string): Promise<any> => {
   return undefined;
 };
 
+// 重试逻辑
 const retryLoadImage = (url: string, retry = 3): Promise<any> =>
   loadImage(url)
     .then(image => image)
@@ -46,15 +47,47 @@ const retryLoadImage = (url: string, retry = 3): Promise<any> =>
       return retry > 0 ? retryLoadImage(url, --retry) : false;
     });
 
+// 获取任务
 const pickTask = () => {
-  const seriesId = queues[0][0] || queues[1][0] || queues[2][0];
-  if (seriesId) {
-    const { studyId, urls } = tasksMap[seriesId];
+  const qItem = queues[0][0] || queues[1][0] || queues[2][0];
+  if (qItem) {
+    const { seriesId, studyId, urls } = qItem;
     return { seriesId, studyId, urls: urls.splice(0, 6) };
   }
   return undefined;
 };
 
+// 清除无效任务队列和任务map
+const clearInvalidQueue = () => {
+  for (let priority = 0; priority < 3; priority++) {
+    const queue = queues[priority];
+    const qItem = queue[0];
+    if (qItem && qItem.urls.length === 0) {
+      queue.shift();
+    }
+  }
+};
+
+// 添加任务到任务队列和任务map 以及调整优先级逻辑
+const addQueue = (data: Tasks) => {
+  const { seriesId, urls, priority = 2 } = data;
+  queues[priority].push(data);
+  // 处理提升优先级情况 目前只处理单张提前这种场景
+  for (let p = 2; p > priority; p--) {
+    const queue = queues[p];
+    const itemIndex = queue.findIndex(item => item.seriesId === seriesId);
+    if (itemIndex !== -1) {
+      const qItem = queue[itemIndex];
+      qItem.urls = qItem.urls.filter(url => urls.indexOf(url) === -1);
+      if (qItem.urls.length === 0) {
+        queues[priority].shift();
+        queue.splice(itemIndex, 1);
+      }
+    }
+  }
+};
+
+// 加载数据逻辑
 const load = async () => {
   if (isWorking) {
     return;
@@ -76,21 +109,20 @@ const load = async () => {
       data: ret,
     }));
     port2.postMessage({ event: 'LOADED', data });
+    clearInvalidQueue();
   }
   isWorking = false;
   load();
 };
 
+// 初始化通信端口事件
 const initEvent = (port: MessagePort) => {
   port.onmessage = async message => {
     // console.log('loader port', message);
     const { event, data } = message.data;
-    if (event === 'load') {
-      const { seriesId, studyId, urls, priority = 2 } = data as Tasks;
-      if (!tasksMap[seriesId]) {
-        queues[priority].push(seriesId);
-        tasksMap[seriesId] = { studyId, urls, priority };
-      }
+    if (event === 'LOAD') {
+      addQueue(data);
+
       load();
     } else if (event === 'abort') {
       console.log('abort');

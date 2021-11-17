@@ -57,7 +57,7 @@ class Loader {
     this.channel = new MessageChannel();
     this.downloadWorkder = this.initDownloadWorker();
     this.cacheWorker = this.initCacheWorker();
-    this.cleanCache();
+    this.cleanDB();
   }
 
   // 初始化缓存线程
@@ -92,55 +92,33 @@ class Loader {
     cacheWorker.postMessage({ event: 'ADD_TASK', data: tmp });
   }
 
-  async clearCache(): Promise<void> {
+  async clearDB(): Promise<void> {
     const instance = await getCacheInstance();
     instance.clear('dicomInfo');
-    instance.clear('cacheInfo');
   }
 
   async getCacheDataBySeriesId<T>(seriesId: string): Promise<undefined> {
-    // if (!this.tasksMap[seriesId]) {
-    //   return undefined;
-    // }
-    // const cacheResult = this.cacheGroup[seriesId];
-    // if (cacheResult) {
-    //   return cacheResult;
-    // }
-    // const { urls } = this.tasksMap[seriesId];
-    // if (urls.length !== result?.length) {
-    //   await instance.deleteByConds('dicom', data => data.seriesId === seriesId);
-    // } else {
-    //   return result;
-    // }
     const { cacheWorker } = this;
-    const cacheData = await cacheWorker.postMessage({ event: 'QUERY_SERIES', data: { seriesId } });
-    console.log('cacheData', cacheData);
-
+    await cacheWorker.postMessage({ event: 'QUERY_SERIES', data: { seriesId } });
     return undefined;
   }
 
   async getCacheDataByIndex<T>(query: QueryObj): Promise<T | undefined> {
-    // const { seriesId, value } = query;
-    // if (!this.tasksMap[seriesId]) {
-    //   return undefined;
-    // }
-    // const { downloadWorkder } = this;
-    // const { urls, studyId } = this.tasksMap[seriesId];
-    // const url = urls[value];
-    // const instance = await getCacheInstance();
-    // const result = await instance.queryByKeyPath<T>('dicomInfo', url);
-    // if (result) {
-    //   return result;
-    // }
-    // await downloadWorkder.postMessage({ studyId, seriesId, url });
-    return undefined;
+    const { cacheWorker } = this;
+    const cacheData = await cacheWorker.postMessage({ event: 'QUERY_SERIES_INDEX', data: query });
+    return cacheData;
   }
 
-  cleanCache(): void {
+  clearCache(seriesIds: Array<string>[]): void {
+    const { cacheWorker } = this;
+    cacheWorker.postMessage({ event: 'CLEAR_CACHE', data: seriesIds });
+  }
+
+  cleanDB(): void {
     const broadcast = new BroadcastChannel('Viewer_Loader');
     const timerId = setTimeout(() => {
       console.log('清理缓存');
-      this.clearCache();
+      this.clearDB();
     }, 30);
     broadcast.onmessage = e => {
       const { data } = e;

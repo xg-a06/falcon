@@ -2,9 +2,7 @@
 import registerPromiseWorker from 'promise-worker/register';
 import { debounce } from '@src/helper/tools';
 import getCacheInstance from '@src/cache';
-import DB from '@src/helper/db';
 import { Tasks } from './index';
-// import { debounce } from '@src/helper/tools';
 
 interface IMessage {
   event: string;
@@ -17,7 +15,6 @@ interface TasksMap {
   [key: string]: {
     studyId: string;
     urls: Array<string>;
-    priority?: number;
   };
 }
 
@@ -29,22 +26,23 @@ const callbackProcess: Record<string, any> = {};
 const cachePending = {
   queue: [] as Array<any>,
 };
-// const cache = {
-//   queue: [] as Array<any>,
-// };
 
-// const doCache = debounce(async (target: any) => {
-//   const { queue: data } = target;
-//   cache.queue = [];
-//   const db = await getCacheInstance();
-//   await db.insert('dicom', data);
-//   console.log('over');
-// }, 16);
+const createPromiseCallback = (callbakcId: string, cbFn: any, data: any): Promise<any> => {
+  const process: any = {};
+  process.pendingWork = new Promise(resolve => {
+    process.resolver = resolve;
+  });
+  process.callback = cbFn;
+  callbackProcess[callbakcId] = process;
+  port1.postMessage({ event: 'LOAD', data: { seriesId: callbakcId, ...data } });
+
+  return process.pendingWork;
+};
 
 const loadData = async (seriesId: string): Promise<Array<any>> => {
   // 先查询数量
   const db = await getCacheInstance();
-  const res = await db.queryByIndex('dicomInfo', 'seriesId', seriesId);
+  const res = await db.queryByIndex<any>('dicomInfo', 'seriesId', seriesId);
   const tasks = { ...tasksMap[seriesId] };
   // 如果有数据
   if (res.length > 0) {
@@ -67,30 +65,63 @@ const loadData = async (seriesId: string): Promise<Array<any>> => {
     tasks.urls = diffUrls;
   }
 
-  let process = callbackProcess[seriesId];
+  const process = callbackProcess[seriesId];
   if (process) {
     const ret = await process.pendingWork;
     return ret;
   }
-  process = {};
-  process.pendingWork = new Promise(resolve => {
-    process.resolver = resolve;
-  });
-  process.callback = (callbackSeriesId: string, imageId: string, data: any) => {
+
+  const cbFn = (callbackSeriesId: string, imageId: string, data: any) => {
     if (!cacheManager[callbackSeriesId]) {
       cacheManager[callbackSeriesId] = [];
     }
     const index = tasksMap[seriesId].urls.findIndex(url => url === imageId);
     cacheManager[seriesId][index] = data;
     if (tasksMap[seriesId].urls.length === cacheManager[seriesId].filter(i => i).length) {
-      process.resolver();
+      callbackProcess[callbackSeriesId].resolver();
       delete callbackProcess[seriesId];
     }
   };
-  callbackProcess[seriesId] = process;
-  port1.postMessage({ event: 'load', data: { seriesId, ...tasks } });
 
-  return process.pendingWork;
+  const data = { ...tasks, priority: 2 };
+
+  return createPromiseCallback(seriesId, cbFn, data);
+};
+
+const loadIndex = async (seriesId: string, value: number): Promise<any> => {
+  // 先查询数量
+  const cond = tasksMap[seriesId].urls[value];
+  const db = await getCacheInstance();
+  const res = await db.queryByKeyPath<any>('dicomInfo', cond);
+  if (res) {
+    console.log('有索引缓存');
+    if (!cacheManager[seriesId]) {
+      cacheManager[seriesId] = [];
+    }
+    cacheManager[seriesId][value] = res;
+    return cacheManager[seriesId][value];
+  }
+
+  const tasks = { ...tasksMap[seriesId] };
+  tasks.urls = [cond];
+  const process = callbackProcess[cond];
+  if (process) {
+    const ret = await process.pendingWork;
+    return ret;
+  }
+
+  const cbFn = (callbackSeriesId: string, imageId: string, data: any) => {
+    if (!cacheManager[callbackSeriesId]) {
+      cacheManager[callbackSeriesId] = [];
+    }
+    const index = tasksMap[seriesId].urls.findIndex(url => url === imageId);
+    cacheManager[seriesId][index] = data;
+    callbackProcess[callbackSeriesId].resolver();
+    delete callbackProcess[imageId];
+  };
+
+  const data = { ...tasks, priority: 0 };
+  return createPromiseCallback(seriesId, cbFn, data);
 };
 
 registerPromiseWorker(async (message: IMessage): Promise<any> => {
@@ -104,32 +135,41 @@ registerPromiseWorker(async (message: IMessage): Promise<any> => {
 
     return cacheManager[seriesId];
   }
+  if (event === 'QUERY_SERIES_INDEX') {
+    const { seriesId, value } = data;
+    if (!cacheManager[seriesId]?.[value]) {
+      await loadIndex(seriesId, value);
+    }
+    console.log('query result');
+
+    return cacheManager[seriesId][value];
+  }
   if (event === 'ADD_TASK') {
     data.forEach((task: Tasks) => {
-      const { studyId, seriesId, urls, priority } = task;
+      const { studyId, seriesId, urls } = task;
       if (!tasksMap[seriesId]) {
         tasksMap[seriesId] = {
           studyId,
           urls,
-          priority,
         };
       }
     });
   }
-  // queue.push(message);
-  // if (!isWorking) {
-  //   work();
-  // }
-  // return false;
+  return undefined;
 });
 
 const doCache = debounce(async () => {
   const { queue: cacheData } = cachePending;
   cachePending.queue = [];
-  const db = await getCacheInstance();
-  await db.insert('dicomInfo', cacheData);
+  // const db = await getCacheInstance();
+  // await db.insert('dicomInfo', cacheData);
   cacheData.forEach(({ seriesId, imageId, data }) => {
-    callbackProcess[seriesId].callback(seriesId, imageId, data);
+    if (callbackProcess[imageId]) {
+      callbackProcess[imageId].callback(seriesId, imageId, data);
+    }
+    if (callbackProcess[seriesId]) {
+      callbackProcess[seriesId].callback(seriesId, imageId, data);
+    }
   });
 }, 16);
 
@@ -140,7 +180,6 @@ const initEvent = (port: MessagePort): void => {
       cachePending.queue.push(...data);
       doCache();
     }
-    // console.log('cache port', message);
   };
 };
 ctx.addEventListener('message', async e => {

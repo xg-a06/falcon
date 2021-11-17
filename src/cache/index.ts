@@ -20,18 +20,18 @@ const stores: Array<StoreOption> = [
       },
     ],
   },
-  {
-    name: 'cacheInfo',
-    option: { keyPath: 'seriesId' },
-    indexs: [
-      {
-        key: 'studyId',
-        option: {
-          unique: false,
-        },
-      },
-    ],
-  },
+  // {
+  //   name: 'cacheInfo',
+  //   option: { keyPath: 'seriesId' },
+  //   indexs: [
+  //     {
+  //       key: 'studyId',
+  //       option: {
+  //         unique: false,
+  //       },
+  //     },
+  //   ],
+  // },
 ];
 
 const dbOptions: DBOptions = {
