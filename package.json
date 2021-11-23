@@ -25,6 +25,11 @@
   "bugs": {
     "url": "https://github.com/xg-a06/lib_tpl/issues"
   },
+  "browser": {
+    "fs": false,
+    "path": false,
+    "os": false
+  },
   "homepage": "https://github.com/xg-a06/lib_tpl#readme",
   "devDependencies": {
     "@babel/core": "^7.13.10",
@@ -83,6 +88,8 @@
     "broadcastchannel-polyfill": "^1.0.1",
     "dicom-parser": "^1.8.11",
     "gl-matrix": "^3.4.3",
+    "jpeg-lossless-decoder-js": "git+ssh://git@github.com/rii-mango/JPEGLosslessDecoderJS.git",
+    "path-browserify": "^1.0.1",
     "promise-worker": "^2.0.1",
     "regenerator-runtime": "^0.13.9"
   }

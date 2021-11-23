@@ -9,6 +9,7 @@ import getCacheInstance from '@src/cache';
 export interface Tasks {
   studyId: string;
   seriesId: string;
+  types?: string;
   urls: Array<string>;
   priority?: number;
 }
@@ -99,8 +100,8 @@ class Loader {
 
   async getCacheDataBySeriesId<T>(seriesId: string): Promise<undefined> {
     const { cacheWorker } = this;
-    await cacheWorker.postMessage({ event: 'QUERY_SERIES', data: { seriesId } });
-    return undefined;
+    const cacheData = await cacheWorker.postMessage({ event: 'QUERY_SERIES', data: { seriesId } });
+    return cacheData;
   }
 
   async getCacheDataByIndex<T>(query: QueryObj): Promise<T | undefined> {

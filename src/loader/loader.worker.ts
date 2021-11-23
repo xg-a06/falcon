@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-globals */
+import createImageData from './imageData';
 import { Tasks } from './index';
 import ajax from '../helper/ajax';
 
@@ -6,6 +7,7 @@ interface queueItem {
   seriesId: string;
   studyId: string;
   urls: Array<string>;
+  type?: string;
 }
 
 // 任务队列
@@ -51,8 +53,8 @@ const retryLoadImage = (url: string, retry = 3): Promise<any> =>
 const pickTask = () => {
   const qItem = queues[0][0] || queues[1][0] || queues[2][0];
   if (qItem) {
-    const { seriesId, studyId, urls } = qItem;
-    return { seriesId, studyId, urls: urls.splice(0, 6) };
+    const { seriesId, studyId, urls, type = 'DICOM' } = qItem;
+    return { seriesId, studyId, urls: urls.splice(0, 6), type };
   }
   return undefined;
 };
@@ -97,17 +99,21 @@ const load = async () => {
     return;
   }
   isWorking = true;
-  const { seriesId, studyId, urls } = tasks;
+  const { seriesId, studyId, urls, type } = tasks;
   const works = urls.map(url => retryLoadImage(url));
   const rets = await Promise.all(works);
 
   if (rets.length > 0) {
-    const data = rets.map((ret, index) => ({
-      studyId,
-      seriesId,
-      imageId: urls[index],
-      data: ret,
-    }));
+    const data = rets.map((ret, index) => {
+      const tmp = createImageData({ type, data: ret, extendData: { id: urls[index], studyId, seriesId } });
+      return { imageId: urls[index], seriesId, studyId, ...tmp };
+    });
+    // const data = rets.map((ret, index) => ({
+    //   studyId,
+    //   seriesId,
+    //   imageId: urls[index],
+    //   data: ret,
+    // }));
     port2.postMessage({ event: 'LOADED', data });
     clearInvalidQueue();
   }

@@ -35,6 +35,13 @@ const baseConfig = {
     alias: {
       '@src': resolve('src'),
     },
+    fallback: {
+      fs: false,
+      path: false,
+    },
+  },
+  stats: {
+    children: true,
   },
   module: {
     rules: [
@@ -66,6 +73,7 @@ const baseConfig = {
       },
     ],
   },
+
   plugins: [
     new webpack.DefinePlugin({
       'process.env': {

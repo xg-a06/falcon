@@ -51,7 +51,7 @@ const loadData = async (seriesId: string): Promise<Array<any>> => {
     cacheManager[seriesId] = tasks.urls.map(url => {
       const tmp = res.find((r: any) => r.imageId === url);
       if (tmp) {
-        return tmp.data;
+        return tmp;
       }
       diffUrls.push(url);
       return undefined;
@@ -71,14 +71,16 @@ const loadData = async (seriesId: string): Promise<Array<any>> => {
     return ret;
   }
 
+  const cache: Array<any> = [];
+
   const cbFn = (callbackSeriesId: string, imageId: string, data: any) => {
     if (!cacheManager[callbackSeriesId]) {
       cacheManager[callbackSeriesId] = [];
     }
     const index = tasksMap[seriesId].urls.findIndex(url => url === imageId);
-    cacheManager[seriesId][index] = data;
-    if (tasksMap[seriesId].urls.length === cacheManager[seriesId].filter(i => i).length) {
-      callbackProcess[callbackSeriesId].resolver();
+    cache[index] = data;
+    if (tasksMap[seriesId].urls.length === cache.filter(i => i).length) {
+      callbackProcess[callbackSeriesId].resolver(cache);
       delete callbackProcess[seriesId];
     }
   };
@@ -129,11 +131,8 @@ registerPromiseWorker(async (message: IMessage): Promise<any> => {
   const { event, data } = message;
   if (event === 'QUERY_SERIES') {
     const { seriesId } = data;
-    if (!cacheManager[seriesId]) {
-      await loadData(seriesId);
-    }
-
-    return cacheManager[seriesId];
+    const ret = await loadData(seriesId);
+    return ret;
   }
   if (event === 'QUERY_SERIES_INDEX') {
     const { seriesId, value } = data;
@@ -161,9 +160,10 @@ registerPromiseWorker(async (message: IMessage): Promise<any> => {
 const doCache = debounce(async () => {
   const { queue: cacheData } = cachePending;
   cachePending.queue = [];
-  // const db = await getCacheInstance();
-  // await db.insert('dicomInfo', cacheData);
-  cacheData.forEach(({ seriesId, imageId, data }) => {
+  const db = await getCacheInstance();
+  await db.insert('dicomInfo', cacheData);
+  cacheData.forEach(data => {
+    const { seriesId, imageId } = data;
     if (callbackProcess[imageId]) {
       callbackProcess[imageId].callback(seriesId, imageId, data);
     }
@@ -171,7 +171,7 @@ const doCache = debounce(async () => {
       callbackProcess[seriesId].callback(seriesId, imageId, data);
     }
   });
-}, 16);
+}, 100);
 
 const initEvent = (port: MessagePort): void => {
   port.onmessage = async message => {
