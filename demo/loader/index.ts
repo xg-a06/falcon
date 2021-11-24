@@ -19,7 +19,7 @@ const tasks: Tasks = {
 // let index = 0;
 async function test() {
   const loader = new Loader();
-  window.loader = loader;
+  // window.loader = loader;
   loader.addTasks(tasks);
   // document.body.addEventListener('keydown', async () => {
   //   if (index < length) {
@@ -49,12 +49,8 @@ async function test() {
   // }, 1000);
   console.time('load');
   const cacheData = await loader.getCacheDataBySeriesId(seriesId);
-  console.log('cacheData', cacheData);
+  // console.log('cacheData', cacheData);
   console.timeEnd('load');
-  console.time('load1');
-  const cacheData1 = await loader.getCacheDataBySeriesId(seriesId);
-  console.log('cacheData1', cacheData1);
-  console.timeEnd('load1');
   // const cacheData = await loader.getCacheDataByIndex<any>({ seriesId, value: 0 });
 
   //   // await sleep(30);

@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import 'broadcastchannel-polyfill';
-import PromiseWorker from 'promise-worker';
+import { debounce } from '@src/helper/tools';
+
 import LoaderWorker from '@src/loader/loader.worker';
-import CacheWorker from '@src/loader/cache.worker';
 import getCacheInstance from '@src/cache';
 // import { ImageData } from '@src/loader/imageData';
 
@@ -14,8 +15,18 @@ export interface Tasks {
   priority?: number;
 }
 
-interface CacheGroup {
-  [key: string]: Array<any>;
+interface TasksMap {
+  [key: string]: {
+    studyId: string;
+    urls: Array<string>;
+  };
+}
+interface CacheManager {
+  [key: string]: Array<ImageData>;
+}
+
+interface CachePending {
+  queue: Array<any>;
 }
 export interface QueryObj {
   seriesId: string;
@@ -24,10 +35,6 @@ export interface QueryObj {
 
 function instanceOfTask(object: any): object is Tasks {
   return 'urls' in object;
-}
-
-interface IWorker extends PromiseWorker {
-  _worker: Worker;
 }
 
 interface LoaderOptions {
@@ -39,42 +46,68 @@ const defaultOptions: LoaderOptions = {
   downloadWorkerMaxCount: 1,
   cacheWorkerMaxCount: 1,
 };
+
 class Loader {
   options: LoaderOptions = defaultOptions;
 
-  cacheWorker: IWorker;
-
   downloadWorkder: Worker;
 
-  channel: MessageChannel;
+  tasksMap: TasksMap = {};
 
-  cacheGroup: CacheGroup = {};
+  cacheManager: CacheManager = {};
 
-  instance: any;
+  callbackProcess: Record<string, any> = {};
+
+  cachePending: CachePending = {
+    queue: [],
+  };
+
+  initState: Promise<any>;
+
+  initResolver: (value: any) => void = () => {};
+
+  doCache: () => void;
 
   constructor(options?: LoaderOptions) {
     this.options = { ...this.options, ...options };
 
-    this.channel = new MessageChannel();
-    this.downloadWorkder = this.initDownloadWorker();
-    this.cacheWorker = this.initCacheWorker();
+    this.initState = new Promise(resolve => {
+      this.initResolver = resolve;
+    });
     this.cleanDB();
-  }
 
-  // 初始化缓存线程
-  initCacheWorker(): IWorker {
-    const { channel } = this;
-    const worker = new CacheWorker();
-    const promiseWorker = new PromiseWorker(worker) as IWorker;
-    promiseWorker._worker.postMessage('init', [channel.port1]);
-    return promiseWorker;
+    this.downloadWorkder = this.initDownloadWorker();
+
+    this.doCache = debounce(async () => {
+      const { cachePending, callbackProcess } = this;
+      let { queue: cacheData } = cachePending;
+      cachePending.queue = [];
+      const db = await getCacheInstance();
+      await db.insert('dicomInfo', cacheData);
+      cacheData.forEach(data => {
+        const { seriesId, imageId } = data;
+        if (callbackProcess[imageId]) {
+          callbackProcess[imageId].callback(seriesId, imageId, data);
+        }
+        if (callbackProcess[seriesId]) {
+          callbackProcess[seriesId].callback(seriesId, imageId, data);
+        }
+      });
+      cacheData = [];
+    }, 16);
   }
 
   // 初始化下载线程
   initDownloadWorker(): Worker {
-    const { channel } = this;
+    const { cachePending } = this;
     const worker = new LoaderWorker();
-    worker.postMessage('init', [channel.port2]);
+    worker.addEventListener('message', e => {
+      const { event, data } = e.data;
+      if (event === 'LOADED') {
+        cachePending.queue.push(...data);
+        this.doCache();
+      }
+    });
     return worker;
   }
 
@@ -83,36 +116,150 @@ class Loader {
   addTasks(tasks: Array<Tasks>): void;
 
   addTasks(tasks: Tasks | Array<Tasks>): void {
+    const { tasksMap } = this;
     let tmp: Array<Tasks> = [];
     if (instanceOfTask(tasks)) {
       tmp = [tasks];
     } else {
       tmp = tasks;
     }
-    const { cacheWorker } = this;
-    cacheWorker.postMessage({ event: 'ADD_TASK', data: tmp });
+    tmp.forEach((task: Tasks) => {
+      const { studyId, seriesId, urls } = task;
+      if (!tasksMap[seriesId]) {
+        tasksMap[seriesId] = {
+          studyId,
+          urls,
+        };
+      }
+    });
+    // const { cacheWorker } = this;
+    // cacheWorker.postMessage({ event: 'ADD_TASK', data: tmp });
+  }
+
+  createPromiseCallback(callbakcId: string, cbFn: any, data: any): Promise<any> {
+    const { callbackProcess, downloadWorkder } = this;
+    const process: any = {};
+    process.pendingWork = new Promise(resolve => {
+      process.resolver = resolve;
+    });
+    process.callback = cbFn;
+    callbackProcess[callbakcId] = process;
+    downloadWorkder.postMessage({ event: 'LOAD', data: { seriesId: callbakcId, ...data } });
+
+    return process.pendingWork;
+  }
+
+  async loadData(seriesId: string): Promise<Array<ImageData>> {
+    const { initState, tasksMap, cacheManager, callbackProcess } = this;
+
+    await initState;
+    // 先查询数量
+    const db = await getCacheInstance();
+    const res = await db.queryByIndex<any>('dicomInfo', 'seriesId', seriesId);
+    const tasks = { ...tasksMap[seriesId] };
+    // 如果有数据
+    if (res.length > 0) {
+      // 填充缓存信息
+      const diffUrls: Array<string> = [];
+      cacheManager[seriesId] = tasks.urls.map(url => {
+        const tmp = res.find((r: any) => r.imageId === url);
+        if (tmp) {
+          return tmp;
+        }
+        diffUrls.push(url);
+        return undefined;
+      });
+      // 如果是全量数据
+      if (tasks.urls.length === res.length) {
+        console.log('有全量缓存');
+        return cacheManager[seriesId];
+      }
+      console.log('有差异化数据');
+      tasks.urls = diffUrls;
+    }
+
+    const process = callbackProcess[seriesId];
+    if (process) {
+      const ret = await process.pendingWork;
+      return ret;
+    }
+
+    const cbFn = (callbackSeriesId: string, imageId: string, data: any) => {
+      if (!cacheManager[callbackSeriesId]) {
+        cacheManager[callbackSeriesId] = [];
+      }
+      const index = tasksMap[seriesId].urls.findIndex(url => url === imageId);
+      cacheManager[seriesId][index] = data;
+      if (tasksMap[seriesId].urls.length === cacheManager[seriesId].filter(i => i).length) {
+        callbackProcess[callbackSeriesId].resolver();
+        delete callbackProcess[seriesId];
+      }
+    };
+
+    const data = { ...tasks, priority: 2 };
+
+    return this.createPromiseCallback(seriesId, cbFn, data);
+  }
+
+  async getCacheDataBySeriesId(seriesId: string): Promise<Array<ImageData>> {
+    const { cacheManager } = this;
+    if (!cacheManager[seriesId]) {
+      await this.loadData(seriesId);
+    }
+    return cacheManager[seriesId];
+  }
+
+  async loadIndex(seriesId: string, value: number): Promise<any> {
+    const { initState, tasksMap, cacheManager, callbackProcess } = this;
+    await initState;
+    // 先查询数量
+    const cond = tasksMap[seriesId].urls[value];
+    const db = await getCacheInstance();
+    const res = await db.queryByKeyPath<any>('dicomInfo', cond);
+    if (res) {
+      console.log('有索引缓存');
+      if (!cacheManager[seriesId]) {
+        cacheManager[seriesId] = [];
+      }
+      cacheManager[seriesId][value] = res;
+      return cacheManager[seriesId][value];
+    }
+
+    const tasks = { ...tasksMap[seriesId] };
+    tasks.urls = [cond];
+    const process = callbackProcess[cond];
+    if (process) {
+      const ret = await process.pendingWork;
+      return ret;
+    }
+
+    const cbFn = (callbackSeriesId: string, imageId: string, data: any) => {
+      if (!cacheManager[callbackSeriesId]) {
+        cacheManager[callbackSeriesId] = [];
+      }
+      const index = tasksMap[seriesId].urls.findIndex(url => url === imageId);
+      cacheManager[seriesId][index] = data;
+      callbackProcess[callbackSeriesId].resolver();
+      delete callbackProcess[imageId];
+    };
+
+    const data = { ...tasks, priority: 0 };
+    return this.createPromiseCallback(seriesId, cbFn, data);
+  }
+
+  async getCacheDataByIndex(query: QueryObj): Promise<ImageData> {
+    const { cacheManager } = this;
+    const { seriesId, value } = query;
+    if (!cacheManager[seriesId]?.[value]) {
+      await this.loadIndex(seriesId, value);
+    }
+    return cacheManager[seriesId][value];
   }
 
   async clearDB(): Promise<void> {
     const instance = await getCacheInstance();
     instance.clear('dicomInfo');
-  }
-
-  async getCacheDataBySeriesId<T>(seriesId: string): Promise<undefined> {
-    const { cacheWorker } = this;
-    const cacheData = await cacheWorker.postMessage({ event: 'QUERY_SERIES', data: { seriesId } });
-    return cacheData;
-  }
-
-  async getCacheDataByIndex<T>(query: QueryObj): Promise<T | undefined> {
-    const { cacheWorker } = this;
-    const cacheData = await cacheWorker.postMessage({ event: 'QUERY_SERIES_INDEX', data: query });
-    return cacheData;
-  }
-
-  clearCache(seriesIds: Array<string>[]): void {
-    const { cacheWorker } = this;
-    cacheWorker.postMessage({ event: 'CLEAR_CACHE', data: seriesIds });
+    this.initResolver(undefined);
   }
 
   cleanDB(): void {
@@ -121,13 +268,16 @@ class Loader {
       console.log('清理缓存');
       this.clearDB();
     }, 30);
+    const start = performance.now();
     broadcast.onmessage = e => {
       const { data } = e;
       if (data === 'ping') {
         broadcast.postMessage('pong');
       } else if (data === 'pong') {
-        console.log('有客户端存活');
+        const end = performance.now();
+        console.log('有客户端存活', end - start);
         clearTimeout(timerId);
+        this.initResolver(undefined);
       }
     };
     broadcast.postMessage('ping');

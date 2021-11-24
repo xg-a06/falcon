@@ -17,9 +17,6 @@ const queues: Record<string, Array<queueItem>> = {
   '2': [],
 };
 
-// 跟cache worker线程通信端口
-let port2: MessagePort;
-
 // 线程上下文
 const ctx: Worker = self as any;
 
@@ -108,38 +105,20 @@ const load = async () => {
       const tmp = createImageData({ type, data: ret, extendData: { id: urls[index], studyId, seriesId } });
       return { imageId: urls[index], seriesId, studyId, ...tmp };
     });
-    // const data = rets.map((ret, index) => ({
-    //   studyId,
-    //   seriesId,
-    //   imageId: urls[index],
-    //   data: ret,
-    // }));
-    port2.postMessage({ event: 'LOADED', data });
+    ctx.postMessage({ event: 'LOADED', data });
     clearInvalidQueue();
   }
   isWorking = false;
   load();
 };
 
-// 初始化通信端口事件
-const initEvent = (port: MessagePort) => {
-  port.onmessage = async message => {
-    // console.log('loader port', message);
-    const { event, data } = message.data;
-    if (event === 'LOAD') {
-      addQueue(data);
-
-      load();
-    } else if (event === 'abort') {
-      console.log('abort');
-    }
-  };
-};
-
 ctx.addEventListener('message', async e => {
-  if (e.data === 'init') {
-    [port2] = e.ports;
-    initEvent(port2);
+  const { event, data } = e.data;
+  if (event === 'LOAD') {
+    addQueue(data);
+    load();
+  } else if (event === 'abort') {
+    console.log('abort');
   }
 });
 

@@ -7,24 +7,31 @@ async function test() {
   console.time('x1');
   const db = await getCacheInstance();
   console.timeEnd('x1');
-  // await db.deleteByConds('dicom', v => v.studyId === '789');
+  console.time('x2');
+  const aa = await db.count('dicomInfo', 'seriesId', '222');
+  db.clear('dicomInfo');
+  console.timeEnd('x2');
+  console.log(aa);
+
+  // // await db.deleteByConds('dicom', v => v.studyId === '789');
 
   document.addEventListener('click', async () => {
-    const aaa = new Array(100).fill(1);
+    const aaa = new Array(1000).fill(1);
     for (const [i] of aaa.entries()) {
-      console.time('yyy');
-      await db.insert('dicom', {
-        imageId: Math.random(),
-        seriesId: '222',
-        studyId: '333',
-        data: new Uint8Array(526396),
-      });
-      console.timeEnd('yyy');
-      await sleep(30);
+      const data = [];
+      for (let j = 0; j < 20; j++) {
+        data.push({
+          imageId: Math.random(),
+          seriesId: '222',
+          studyId: '333',
+          data: new Uint8Array(526396),
+        });
+      }
+      await db.insert('dicomInfo', data);
     }
   });
   // await db.clear('dicom');
-  // const aa = await db.count('dicom', 'seriesId', '1.2.392.200036.9116.2.2059767860.1617866629.8.1307500001.2');
+  //
   // console.log(aa);
 }
 
