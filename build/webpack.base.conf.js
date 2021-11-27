@@ -38,6 +38,7 @@ const baseConfig = {
     fallback: {
       fs: false,
       path: false,
+      Buffer: false,
     },
   },
   stats: {

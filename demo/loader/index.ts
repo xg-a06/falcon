@@ -6,8 +6,8 @@ import dataJson from './data.json';
 
 const sleep = (time: number) => new Promise(reslove => setTimeout(reslove, time));
 
-const studyId = '1.2.840.20210402.121033010326';
-const seriesId = '1.2.392.200036.9116.2.2059767860.1617342761.10.1276500003.2';
+const studyId = '1.2.840.20211118.121111708054';
+const seriesId = '1.2.392.200036.9116.2.1796265406.1637203228.5.1202400001.1';
 const urls = dataJson.data.images.map(image => `http://10.0.70.3:8000/${image.storagePath}`);
 
 const tasks: Tasks = {
@@ -19,7 +19,7 @@ const tasks: Tasks = {
 // let index = 0;
 async function test() {
   const loader = new Loader();
-  // window.loader = loader;
+  window.loader = loader;
   loader.addTasks(tasks);
   // document.body.addEventListener('keydown', async () => {
   //   if (index < length) {
@@ -47,11 +47,15 @@ async function test() {
   // setTimeout(() => {
   //   fetch('/ert');
   // }, 1000);
+  setTimeout(() => {
+    loader.clear(seriesId);
+  }, 2000);
   console.time('load');
   const cacheData = await loader.getCacheDataBySeriesId(seriesId);
-  // console.log('cacheData', cacheData);
+  // const cacheData = await loader.getCacheDataByIndex({ seriesId, value: 0 });
+
+  console.log('cacheData', cacheData);
   console.timeEnd('load');
-  // const cacheData = await loader.getCacheDataByIndex<any>({ seriesId, value: 0 });
 
   //   // await sleep(30);
   // }

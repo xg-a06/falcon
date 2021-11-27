@@ -24,15 +24,13 @@ let isWorking = false;
 
 // 加载图片
 const loadImage = async (url: string): Promise<any> => {
-  let image = null;
   const xhr = ajax.create({
     url,
     responseType: 'arraybuffer',
   });
   const { code, data } = await xhr.request();
   if (code === 200) {
-    image = data;
-    return image;
+    return data;
   }
   return undefined;
 };
@@ -86,6 +84,18 @@ const addQueue = (data: Tasks) => {
   }
 };
 
+// 终止未加载task
+const abortQueue = ({ seriesId }: Record<string, string>) => {
+  console.log('abort');
+  for (let priority = 0; priority < 3; priority++) {
+    const queue = queues[priority];
+    const itemIndex = queue.findIndex(item => item.seriesId === seriesId);
+    if (itemIndex !== -1) {
+      queue.splice(itemIndex, 1);
+    }
+  }
+};
+
 // 加载数据逻辑
 const load = async () => {
   if (isWorking) {
@@ -117,8 +127,8 @@ ctx.addEventListener('message', async e => {
   if (event === 'LOAD') {
     addQueue(data);
     load();
-  } else if (event === 'abort') {
-    console.log('abort');
+  } else if (event === 'ABORT') {
+    abortQueue(data);
   }
 });
 

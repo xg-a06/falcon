@@ -1,11 +1,12 @@
 import Transform from '@src/helper/transform';
+import { ImageData as RenderData } from '@src/loader/imageData';
 
 type ElmSize = {
   width: number;
   height: number;
 };
 
-type RenderFunction = (renderData: any) => ImageData;
+export type RenderFunction = (renderData: RenderData) => ImageData;
 
 interface DisplayState {
   hflip: boolean;
@@ -36,7 +37,7 @@ class Base2D {
 
   transform: Transform;
 
-  renderData: unknown;
+  renderData?: RenderData;
 
   renderer: RenderFunction;
 
@@ -106,14 +107,7 @@ class Base2D {
     transform.rotate(angle);
     transform.scale(hflip ? -1 : 1, vflip ? -1 : 1);
     transform.translate(-renderCanvas.width / 2, -renderCanvas.height / 2);
-    ctx.setTransform(
-      transform.mat[0],
-      transform.mat[1],
-      transform.mat[2],
-      transform.mat[3],
-      transform.mat[4],
-      transform.mat[5],
-    );
+    ctx.setTransform(transform.mat[0], transform.mat[1], transform.mat[2], transform.mat[3], transform.mat[4], transform.mat[5]);
   }
 
   getCanvasContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {

@@ -53,6 +53,7 @@
     "@babel/plugin-transform-runtime": "^7.15.8",
     "@babel/preset-env": "^7.13.10",
     "@babel/preset-typescript": "^7.13.0",
+    "@types/node": "^16.11.10",
     "@typescript-eslint/eslint-plugin": "^4.18.0",
     "@typescript-eslint/parser": "^4.18.0",
     "babel-eslint": "^10.0.1",
@@ -85,12 +86,7 @@
     "worker-loader": "^3.0.8"
   },
   "dependencies": {
-    "broadcastchannel-polyfill": "^1.0.1",
     "dicom-parser": "^1.8.11",
-    "gl-matrix": "^3.4.3",
-    "jpeg-lossless-decoder-js": "git+ssh://git@github.com/rii-mango/JPEGLosslessDecoderJS.git",
-    "path-browserify": "^1.0.1",
-    "promise-worker": "^2.0.1",
-    "regenerator-runtime": "^0.13.9"
+    "gl-matrix": "^3.4.3"
   }
 }

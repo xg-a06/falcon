@@ -1,3 +1,5 @@
+import { DataSet } from 'dicom-parser';
+
 function debounce(fun: any, delay: number, ctx?: any) {
   return (...args: Array<any>): void => {
     const context = ctx || {};
@@ -10,7 +12,7 @@ function debounce(fun: any, delay: number, ctx?: any) {
 
 function throttle(fun: any, delay: number, ctx?: any): any {
   let last = 0;
-  return function (...args: Array<any>) {
+  return (...args: Array<any>) => {
     const _this = ctx || {};
     const now = new Date() as unknown as number;
     if (now - last > delay) {
@@ -20,8 +22,8 @@ function throttle(fun: any, delay: number, ctx?: any): any {
   };
 }
 
-function getNumberValues(dataSet: any, tag: string, minimumLength = 0): any {
-  const values = [];
+function getNumberValues(dataSet: DataSet, tag: string, minimumLength = 0): any {
+  const values: Array<any> = [];
   const valueAsString = dataSet.string(tag);
 
   if (!valueAsString) {
@@ -39,7 +41,7 @@ function getNumberValues(dataSet: any, tag: string, minimumLength = 0): any {
   return values;
 }
 
-function getNumberValue(dataSet: any, tag: string): any {
+function getNumberValue(dataSet: DataSet, tag: string): any {
   const valueAsString = dataSet.string(tag);
 
   if (!valueAsString) {
@@ -58,7 +60,7 @@ function readCodeList(byteArray: any, position: any, length: any) {
     throw new Error('dicomParser.readFixedString: attempt to read past end of buffer');
   }
 
-  const result = [];
+  const result: Array<any> = [];
   let byte;
 
   for (let i = 0; i < length; i++) {
@@ -74,7 +76,7 @@ function readCodeList(byteArray: any, position: any, length: any) {
   return result;
 }
 
-function stringGBK(dataSet: any, tag: string): any {
+function stringGBK(dataSet: DataSet, tag: string): any {
   const element = dataSet.elements[tag];
 
   if (element && element.length > 0) {
@@ -84,12 +86,12 @@ function stringGBK(dataSet: any, tag: string): any {
   return undefined;
 }
 
-function stringUTF8(dataSet: any, tag: string): any {
+function stringUTF8(dataSet: DataSet, tag: string): any {
   const element = dataSet.elements[tag];
 
   if (element && element.length > 0) {
     const codeList = readCodeList(dataSet.byteArray, element.dataOffset, element.length);
-    const code = codeList.map(item => `%${item.toString(16)}`).join('');
+    const code = codeList.map((item: any) => `%${item.toString(16)}`).join('');
     try {
       return decodeURIComponent(code).trim();
     } catch (e) {
