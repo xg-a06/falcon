@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-restricted-syntax */
 import Loader, { Tasks, QueryObj } from '@src/loader';
-import dataJson from './data.json';
+import dataJson from '../data/data.json';
 
 const sleep = (time: number) => new Promise(reslove => setTimeout(reslove, time));
 

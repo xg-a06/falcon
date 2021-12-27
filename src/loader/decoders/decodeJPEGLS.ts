@@ -1,5 +1,5 @@
 import { ImageData } from '@src/loader/imageData';
-import CharLS from '@src/codecs/charLS-DynamicMemory-browser';
+import CharLS from '@src/loader/codecs/charLS-DynamicMemory-browser';
 
 let charLS: any;
 

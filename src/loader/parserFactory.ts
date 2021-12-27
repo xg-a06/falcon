@@ -2,10 +2,10 @@
 /* eslint-disable no-bitwise */
 import dicomParser, { DataSet, readEncapsulatedImageFrame, createJPEGBasicOffsetTable, readEncapsulatedPixelDataFromFragments } from 'dicom-parser';
 import { getNumberValues, getNumberValue, stringUTF8, getComporessionState } from '@src/helper/tools';
-import decodeLittleEndian from '@src/decoders/decodeLittleEndian';
-import decodeBigEndian from '@src/decoders/decodeBigEndian';
-import decodeRLE from '@src/decoders/decodeRLE';
-import decodeJPEGLS from '@src/decoders/decodeJPEGLS';
+import decodeLittleEndian from '@src/loader/decoders/decodeLittleEndian';
+import decodeBigEndian from '@src/loader/decoders/decodeBigEndian';
+import decodeRLE from '@src/loader/decoders/decodeRLE';
+import decodeJPEGLS from '@src/loader/decoders/decodeJPEGLS';
 import { ImageData, ExtendData } from './imageData';
 import Tags from './tagMap';
 

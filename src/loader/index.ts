@@ -1,5 +1,5 @@
 import LoaderWorker from '@src/loader/loader.worker';
-// import { ImageData } from '@src/loader/imageData';
+import { ImageData } from '@src/loader/imageData';
 
 // 目前新loader加载模式暂无优先级场景，先保留字段，后续有需要再加
 export interface Tasks {
@@ -127,11 +127,12 @@ class Loader {
 
     const cbFn = (callbackSeriesId: string, imageId: string, data: any) => {
       if (!tasksMap[seriesId]) {
-        callbackProcess[callbackSeriesId].resolver();
+        callbackProcess[seriesId].resolver();
+        delete callbackProcess[seriesId];
         return;
       }
-      if (!cacheManager[callbackSeriesId]) {
-        cacheManager[callbackSeriesId] = [];
+      if (!cacheManager[seriesId]) {
+        cacheManager[seriesId] = [];
       }
       const index = tasksMap[seriesId].urls.findIndex(url => url === imageId);
       cacheManager[seriesId][index] = data;
@@ -160,16 +161,21 @@ class Loader {
 
     const process = callbackProcess[cond];
     if (process) {
-      const ret = await process.pendingWork;
-      return ret;
+      // const ret = await process.pendingWork;
+      return process.pendingWork;
     }
 
     const tasks = { ...tasksMap[seriesId] };
     tasks.urls = [cond];
 
     const cbFn = (callbackSeriesId: string, imageId: string, data: any) => {
-      if (!cacheManager[callbackSeriesId]) {
-        cacheManager[callbackSeriesId] = [];
+      if (!tasksMap[seriesId]) {
+        callbackProcess[imageId].resolver();
+        delete callbackProcess[imageId];
+        return;
+      }
+      if (!cacheManager[seriesId]) {
+        cacheManager[seriesId] = [];
       }
       const index = tasksMap[seriesId].urls.findIndex(url => url === imageId);
       cacheManager[seriesId][index] = data;
@@ -178,7 +184,7 @@ class Loader {
     };
 
     const data = { ...tasks, priority: 0 };
-    return this.createPromiseCallback(seriesId, cbFn, data);
+    return this.createPromiseCallback(cond, cbFn, data);
   }
 
   async getCacheDataByIndex(query: QueryObj): Promise<ImageData> {
@@ -187,6 +193,7 @@ class Loader {
     if (!cacheManager[seriesId]?.[value]) {
       await this.loadIndex(seriesId, value);
     }
+
     return cacheManager[seriesId][value];
   }
 
