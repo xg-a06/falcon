@@ -2,6 +2,7 @@ import TOOL_TYPES, { TOOLTYPES } from '@src/const/toolTypes';
 import { HTMLCanvasElementEx } from '@src/viewportsManager';
 
 import WWWC from '@src/tool/wwwc';
+import Length from '@src/tool/length';
 
 export interface Coords {
   clientX: number;
@@ -17,6 +18,7 @@ type Constructor<T> = new (...args: any[]) => T;
 
 const toolConstructors: Record<string, Constructor<any>> = {
   [TOOL_TYPES.WWWC]: WWWC,
+  [TOOL_TYPES.LENGTH]: Length,
 };
 
 const toolsManager = {
@@ -47,13 +49,4 @@ const toolsManager = {
   },
 };
 
-// const enableTool = (canvas, toolType) => {};
-
-// const disableTool = (canvas, toolType) => {};
-
-// const passiveTool = (canvas, toolType) => {};
-
-// const activeTool = (canvas, toolType, which) => {};
-
-// export { enable, enableTool, disableTool, passiveTool, activeTool };
 export default toolsManager;

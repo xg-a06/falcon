@@ -1,7 +1,7 @@
 import { EVENT_TYPES } from '@src/const/eventTypes';
 import { ImageData as RenderData } from '@src/loader/imageData';
 import Transform from '@src/helper/transform';
-import { HTMLCanvasElementEx, DisplayState, dispatchEvent } from '@src/viewportsManager';
+import { HTMLCanvasElementEx, DisplayState } from '@src/viewportsManager';
 import { getVoiLUTData, WWWC } from '@src/helper/lut';
 
 export interface RenderOptions {

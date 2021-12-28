@@ -59,6 +59,7 @@ class Base {
     }
     return this.target;
   }
+
   // getFont(scale = 1) {
   //   scale /= 4;
   //   scale = scale < 1 ? 1 : scale;

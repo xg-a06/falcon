@@ -32,6 +32,7 @@ const renderOptions2: RenderOptions = {
 
 viewportsManager.enable(elm2);
 toolsManager.activeTool(elm2, Tool_Types.WWWC);
+// toolsManager.activeTool(elm2, Tool_Types.LENGTH);
 // toolsManager.disableTool(elm1);
 
 async function test(query: QueryObj) {
