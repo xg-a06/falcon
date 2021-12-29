@@ -1,5 +1,17 @@
 import { EVENT_LEVELS } from '@src/const/eventTypes';
-import { Coords } from '@src/toolsManager';
+import { HTMLCanvasElementEx } from '@src/viewportsManager';
+
+interface Coords {
+  pageX: number;
+  pageY: number;
+  clientX: number;
+  clientY: number;
+  offsetX: number;
+  offsetY: number;
+  imageX: number;
+  imageY: number;
+  isInValidArea: boolean;
+}
 
 interface HandlerEvent extends Event {
   target: HTMLCanvasElementEx;
@@ -13,21 +25,23 @@ const getAction = (eventName: string) => {
   return tmp[tmp.length - 1];
 };
 
-const analysisCoords = (e: any): Coords | boolean => {
-  const { clientX, clientY, target } = e;
+const analysisCoords = (target: any, e: any): Coords | boolean => {
+  const { pageX, pageY, clientX, clientY } = e;
   const { image, transform } = target;
   if (!image) {
     return false;
   }
   const { columns, rows } = image;
   const { left, top } = target.getBoundingClientRect();
-  const offsetX = clientX - left;
-  const offsetY = clientY - top;
+  const offsetX = pageX - left;
+  const offsetY = pageY - top;
   const { x: imageX, y: imageY } = transform.invertPoint(offsetX, offsetY);
 
   const isInValidArea = !(imageX < 0 || imageX >= columns || imageY < 0 || imageY >= rows);
 
   return {
+    pageX,
+    pageY,
     clientX,
     clientY,
     offsetX,
@@ -54,11 +68,11 @@ const dispatchEvent = (target: HTMLCanvasElement, eventName: string, detail: any
   target.dispatchEvent(event);
 };
 
-const check = (e: any) => {
-  if (!e.target.matches('[data-tx-dicom]')) {
+const check = (target: any, e: any) => {
+  if (!target.matches('[data-tx-dicom]')) {
     return false;
   }
-  const coords = analysisCoords(e);
+  const coords = analysisCoords(target, e);
   if (coords === false) {
     return false;
   }

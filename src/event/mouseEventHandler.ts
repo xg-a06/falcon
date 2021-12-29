@@ -2,7 +2,8 @@ import { EVENT_TYPES } from '@src/const/eventTypes';
 import { dispatchEvent, check } from '@src/event/tools';
 
 const mousemoveHandler = (e: any) => {
-  const coords = check(e);
+  const { target } = e;
+  const coords = check(target, e);
   if (coords === false) {
     return;
   }
@@ -13,14 +14,35 @@ const mousemoveHandler = (e: any) => {
 };
 
 const mousedownHandler = (e: any) => {
-  const coords = check(e);
+  const { target } = e;
+  const coords = check(target, e);
   if (coords === false) {
     return;
   }
   const detail = {
     coords,
   };
-  dispatchEvent(e.target, EVENT_TYPES.TOUCHDOWN, detail);
+  dispatchEvent(target, EVENT_TYPES.TOUCHDOWN, detail);
+
+  const touchmoveHandler = (moveEvent: any) => {
+    const moveCoords = check(target, moveEvent);
+    if (moveCoords === false) {
+      return;
+    }
+    const moveDetail = {
+      coords: moveCoords,
+    };
+
+    dispatchEvent(target, EVENT_TYPES.TOUCHMOVE, moveDetail);
+  };
+
+  const mouseupHandler = () => {
+    document.removeEventListener('mousemove', touchmoveHandler);
+    document.removeEventListener('mouseup', mouseupHandler);
+  };
+
+  document.addEventListener('mousemove', touchmoveHandler);
+  document.addEventListener('mouseup', mouseupHandler);
 };
 
 export { mousemoveHandler, mousedownHandler };

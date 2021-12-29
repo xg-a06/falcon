@@ -11,7 +11,7 @@ interface DisplayState {
   angle: number;
   invert: boolean;
   offset: { x: number; y: number };
-  wwwc?: { ww: number; wc: number };
+  wwwc: { ww: number; wc: number };
 }
 
 interface HTMLCanvasElementEx extends HTMLCanvasElement {
@@ -19,7 +19,7 @@ interface HTMLCanvasElementEx extends HTMLCanvasElement {
   image: RenderData;
   transform: Transform;
   tools: Array<any>;
-  renderer: (...args: any[]) => any;
+  refresh: (...args: any[]) => any;
 }
 
 const viewportManager = {

@@ -2,11 +2,12 @@ import { EVENT_TYPES } from '@src/const/eventTypes';
 import { ImageData as RenderData } from '@src/loader/imageData';
 import Transform from '@src/helper/transform';
 import { HTMLCanvasElementEx, DisplayState } from '@src/viewportsManager';
+import { dispatchEvent } from '@src/event/tools';
 import { getVoiLUTData, WWWC } from '@src/helper/lut';
 
 export interface RenderOptions {
   elm: HTMLCanvasElement;
-  displayState: DisplayState;
+  displayState?: Partial<DisplayState>;
 }
 
 type RenderFunction = (renderData: RenderData, options: RenderOptions) => boolean;
@@ -26,7 +27,19 @@ const getElmSize = (elm: HTMLElement): { width: number; height: number } => {
   return { width: clientWidth, height: clientHeight };
 };
 
-const generateImageData = (renderData: RenderData, wwwc?: WWWC): ImageData => {
+const generateDisplayState = (renderData: RenderData, elm: HTMLCanvasElement, initDisplayState: Partial<DisplayState>) => {
+  const { width, height } = getElmSize(elm);
+  const { columns, rows } = renderData;
+  const ret: DisplayState = { hflip: false, vflip: false, angle: 0, invert: false, offset: { x: 0, y: 0 }, scale: 1, wwwc: { ww: 0, wc: 0 } };
+  ret.wwwc = {
+    ww: initDisplayState.wwwc?.ww || renderData.windowWidth,
+    wc: initDisplayState.wwwc?.wc || renderData.windowCenter,
+  };
+  ret.scale = Math.min(width / columns, height / rows);
+  return ret;
+};
+
+const generateImageData = (renderData: RenderData, wwwc: WWWC): ImageData => {
   const { columns, rows, pixelData, minPixelValue } = renderData;
   const imageData = new ImageData(columns, rows);
   const numPixels = columns * columns;
@@ -55,7 +68,6 @@ const generateRenderCanvas = (width: number, height: number, imageData: ImageDat
 const setTransform = (ctx: CanvasRenderingContext2D, transformOptions: TransformOptions): Transform => {
   const { canvasWidth, canvasHeight, renderCanvasWidth, renderCanvasHeight, offset, angle, scale, hflip, vflip } = transformOptions;
   const transform = new Transform();
-  // const autoScale = Math.min(canvas.width / renderCanvas.width, canvas.height / renderCanvas.height);
   transform.reset();
   transform.translate(offset.x, offset.y);
   transform.translate(canvasWidth / 2, canvasHeight / 2);
@@ -69,20 +81,32 @@ const setTransform = (ctx: CanvasRenderingContext2D, transformOptions: Transform
 };
 
 const basicRender: RenderFunction = (renderData: RenderData, options: RenderOptions): boolean => {
-  const { elm, displayState } = options;
-  const { offset, angle, scale, hflip, vflip, wwwc } = displayState;
-  const imageData = generateImageData(renderData, wwwc);
-  const { columns, rows } = renderData;
-  const renderCanvas = generateRenderCanvas(columns, rows, imageData);
+  if (!renderData) {
+    return false;
+  }
+  const { elm, displayState = {} } = options;
 
   const { width, height } = getElmSize(elm);
   if (width === 0 || height === 0) {
     return false;
   }
+  const elmEx = elm as HTMLCanvasElementEx;
+
+  if (!elmEx.displayState) {
+    const defaultDisplayState = generateDisplayState(renderData, elm, displayState);
+    elmEx.displayState = { ...defaultDisplayState, ...displayState };
+  }
+
+  const { offset, angle, scale, hflip, vflip, wwwc } = elmEx.displayState;
+  const imageData = generateImageData(renderData, wwwc);
+  const { columns, rows } = renderData;
+  const renderCanvas = generateRenderCanvas(columns, rows, imageData);
 
   const ctx = elm.getContext('2d') as CanvasRenderingContext2D;
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, width, height);
+
   const transformOptions: TransformOptions = {
     canvasWidth: width,
     canvasHeight: height,
@@ -94,15 +118,12 @@ const basicRender: RenderFunction = (renderData: RenderData, options: RenderOpti
     hflip,
     vflip,
   };
-  const transform = setTransform(ctx!, transformOptions);
+  const transform = setTransform(ctx, transformOptions);
 
   ctx.drawImage(renderCanvas, 0, 0, columns, rows, 0, 0, columns, rows);
-
-  const elmEx = elm as HTMLCanvasElementEx;
   elmEx.transform = transform;
   elmEx.image = renderData;
-  elmEx.displayState = displayState;
-  elmEx.renderer = basicRender;
+  elmEx.refresh = () => basicRender(elmEx.image, { elm });
 
   dispatchEvent(elm, EVENT_TYPES.RENDERED);
   return true;

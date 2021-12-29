@@ -1,39 +1,41 @@
+/* eslint-disable no-restricted-properties */
 import TOOL_TYPES from '@src/const/toolTypes';
 import { HandlerEvent } from '@src/event/tools';
 import { HTMLCanvasElementEx } from '@src/viewportsManager';
 import Base from './base';
 
 class WWWC extends Base {
-  points: { x: number; y: number };
+  point: number;
 
   constructor(target: HTMLCanvasElement, options: any) {
     super(target, options);
-    this.toolType = TOOL_TYPES.WWWC;
-    this.points = { x: 0, y: 0 };
+    this.toolType = TOOL_TYPES.SCALE;
+    this.point = 0;
   }
 
   touchdown(e: HandlerEvent) {
     const {
-      coords: { pageX, pageY },
+      coords: { pageY },
     } = e.detail;
-    this.points = { x: pageX, y: pageY };
-    console.log(e.target, e.detail.coords);
+    this.point = pageY;
   }
 
   touchmove(e: HandlerEvent) {
     const target = e.target as HTMLCanvasElementEx;
-    const { x, y } = this.points;
     const {
-      coords: { pageX, pageY },
+      coords: { pageY },
     } = e.detail;
-    const deltaX = pageX - x;
-    const deltaY = pageY - y;
-    this.points = { x: pageX, y: pageY };
     const { displayState, refresh } = target;
-    displayState.wwwc!.ww += deltaX;
-    displayState.wwwc!.wc += deltaY;
-    console.log('displayState.wwwc', displayState.wwwc);
+    let { scale: tmpScale } = displayState;
+    const stepY = pageY - this.point;
+    this.point = pageY;
 
+    const ticks = stepY / 200;
+    const pow = 1.7;
+    const oldFactor = Math.log(tmpScale) / Math.log(pow);
+    const factor = oldFactor + ticks;
+    tmpScale = Math.pow(pow, factor);
+    displayState.scale = tmpScale;
     refresh();
   }
 }

@@ -23,15 +23,17 @@ const elm1 = document.getElementById('scene1') as HTMLCanvasElement;
 const elm2 = document.getElementById('scene2') as HTMLCanvasElement;
 const renderOptions1: RenderOptions = {
   elm: elm1,
-  displayState: { hflip: false, vflip: false, scale: 0.5, angle: 0, invert: false, offset: { x: 0, y: 0 }, wwwc: { ww: 800, wc: 300 } },
+  displayState: { wwwc: { ww: 800, wc: 300 } },
 };
 const renderOptions2: RenderOptions = {
   elm: elm2,
-  displayState: { hflip: false, vflip: false, scale: 0.5, angle: 0, invert: false, offset: { x: 0, y: 0 }, wwwc: { ww: 800, wc: 300 } },
+  displayState: {},
 };
 
+viewportsManager.enable(elm1);
+toolsManager.activeTool(elm1, Tool_Types.WWWC);
 viewportsManager.enable(elm2);
-toolsManager.activeTool(elm2, Tool_Types.WWWC);
+toolsManager.activeTool(elm2, Tool_Types.SCALE);
 // toolsManager.activeTool(elm2, Tool_Types.LENGTH);
 // toolsManager.disableTool(elm1);
 

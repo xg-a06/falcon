@@ -1,5 +1,6 @@
 const TOOL_TYPES = {
   WWWC: 'TX_WWWC',
+  SCALE: 'TX_SCALE',
   LENGTH: 'TX_LENGTH',
 };
 
