@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Loader, { Tasks, QueryObj } from '@src/loader';
+import getLoader, { Tasks, QueryObj } from '@src/loader';
+import { VIEWPORT_EVENT_TYPES } from '@src/const/eventTypes';
 import Tool_Types from '@src/const/toolTypes';
 import viewportsManager from '@src/viewportsManager';
 import toolsManager from '@src/toolsManager';
@@ -15,7 +16,7 @@ const tasks: Tasks = {
   urls,
 };
 
-const loader = new Loader();
+const loader = getLoader();
 window.loader = loader;
 loader.addTasks(tasks);
 
@@ -24,16 +25,32 @@ const elm2 = document.getElementById('scene2') as HTMLCanvasElement;
 const renderOptions1: RenderOptions = {
   elm: elm1,
   displayState: { wwwc: { ww: 800, wc: 300 } },
+  seriesInfo: {
+    studyId,
+    seriesId,
+    count: urls.length,
+  },
 };
 const renderOptions2: RenderOptions = {
   elm: elm2,
   displayState: {},
+  seriesInfo: {
+    studyId,
+    seriesId,
+    count: urls.length,
+  },
 };
 
 viewportsManager.enable(elm1);
 toolsManager.activeTool(elm1, Tool_Types.WWWC);
+elm1.addEventListener(VIEWPORT_EVENT_TYPES.DISPLAY_STATE_CHANGE, (e: any) => {
+  console.log('DISPLAY_STATE_CHANGE', e.target.displayState.wwwc);
+});
+elm1.addEventListener(VIEWPORT_EVENT_TYPES.DICOM_INFO_CHANGE, (e: any) => {
+  console.log('DICOM_INFO_CHANGE', e.target.dicomInfo);
+});
 viewportsManager.enable(elm2);
-toolsManager.activeTool(elm2, Tool_Types.SCALE);
+toolsManager.activeTool(elm2, Tool_Types.LENGTH);
 // toolsManager.activeTool(elm2, Tool_Types.LENGTH);
 // toolsManager.disableTool(elm1);
 

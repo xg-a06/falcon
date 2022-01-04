@@ -1,7 +1,7 @@
 import { parserDicom } from './parserFactory';
 
 export interface ImageData {
-  id: string;
+  imageId: string;
   seriesId: string;
   studyId: string;
   transferSyntax: string; // 转换格式
@@ -48,7 +48,7 @@ export interface ImageData {
   byteArray?: any;
 }
 
-export type ExtendData = Pick<ImageData, 'id' | 'studyId' | 'seriesId'>;
+export type ExtendData = Pick<ImageData, 'imageId' | 'studyId' | 'seriesId'>;
 
 interface ISource {
   type: string;

@@ -21,6 +21,9 @@ const toolsManager = {
       targetTool = new toolConstructors[toolType](options);
       canvas.tools.push(targetTool);
     }
+    if (canvas.toolsData[toolType] === undefined) {
+      canvas.toolsData[toolType] = {};
+    }
     targetTool.level = state;
     const { refresh } = canvas;
     if (refresh) {

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import Loader, { Tasks, QueryObj } from '@src/loader';
+import getLoader, { Tasks, QueryObj } from '@src/loader';
 import basicRender, { RenderOptions } from '@src/renderer/basic';
 import dataJson from '../data/data1.json';
 
@@ -12,13 +12,18 @@ const tasks: Tasks = {
   urls,
 };
 
-const loader = new Loader();
+const loader = getLoader();
 window.loader = loader;
 loader.addTasks(tasks);
 
 const renderOptions: RenderOptions = {
   elm: document.getElementById('scene') as HTMLCanvasElement,
-  displayState: { hflip: false, vflip: false, scale: 1, angle: 0, invert: false, offset: { x: 0, y: 0 }, wwwc: { ww: 800, wc: 300 } },
+  displayState: { wwwc: { ww: 800, wc: 300 } },
+  seriesInfo: {
+    studyId,
+    seriesId,
+    count: urls.length,
+  },
 };
 
 async function test(query: QueryObj) {

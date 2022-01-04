@@ -36,7 +36,15 @@ const mousedownHandler = (e: any) => {
     dispatchEvent(target, EVENT_TYPES.TOUCHMOVE, moveDetail);
   };
 
-  const mouseupHandler = () => {
+  const mouseupHandler = (upEvent: any) => {
+    const upCoords = check(target, upEvent);
+    if (upCoords === false) {
+      return;
+    }
+    const upDetail = {
+      coords: upCoords,
+    };
+    dispatchEvent(target, EVENT_TYPES.TOUCHUP, upDetail);
     document.removeEventListener('mousemove', touchmoveHandler);
     document.removeEventListener('mouseup', mouseupHandler);
   };

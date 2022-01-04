@@ -1,13 +1,16 @@
-import { EVENT_TYPES } from '@src/const/eventTypes';
+import { EVENT_TYPES, VIEWPORT_EVENT_TYPES } from '@src/const/eventTypes';
 import { ImageData as RenderData } from '@src/loader/imageData';
+import getLoader from '@src/loader/index';
 import Transform from '@src/helper/transform';
-import { HTMLCanvasElementEx, DisplayState } from '@src/viewportsManager';
+import { HTMLCanvasElementEx, DisplayState, DicomInfo, SeriesInfo } from '@src/viewportsManager';
 import { dispatchEvent } from '@src/event/tools';
+import { doSetInterval } from '@src/helper/tools';
 import { getVoiLUTData, WWWC } from '@src/helper/lut';
 
 export interface RenderOptions {
   elm: HTMLCanvasElement;
   displayState?: Partial<DisplayState>;
+  seriesInfo: SeriesInfo;
 }
 
 type RenderFunction = (renderData: RenderData, options: RenderOptions) => boolean;
@@ -30,13 +33,33 @@ const getElmSize = (elm: HTMLElement): { width: number; height: number } => {
 const generateDisplayState = (renderData: RenderData, elm: HTMLCanvasElement, initDisplayState: Partial<DisplayState>) => {
   const { width, height } = getElmSize(elm);
   const { columns, rows } = renderData;
-  const ret: DisplayState = { hflip: false, vflip: false, angle: 0, invert: false, offset: { x: 0, y: 0 }, scale: 1, wwwc: { ww: 0, wc: 0 } };
-  ret.wwwc = {
-    ww: initDisplayState.wwwc?.ww || renderData.windowWidth,
-    wc: initDisplayState.wwwc?.wc || renderData.windowCenter,
-  };
-  ret.scale = Math.min(width / columns, height / rows);
+  const scale = Math.min(width / columns, height / rows);
+  let ret: DisplayState = { hflip: false, vflip: false, angle: 0, invert: false, offset: { x: 0, y: 0 }, scale, wwwc: { ww: renderData.windowWidth, wc: renderData.windowCenter } };
+  ret = { ...ret, ...initDisplayState };
   return ret;
+};
+
+const getBeginImages = async (seriesInfo: SeriesInfo) => {
+  const { seriesId, count } = seriesInfo;
+  const loader = getLoader();
+  let img0;
+  let img1;
+  if (count === 1) {
+    img0 = await loader.loadIndex(seriesId, 0);
+  } else if (count > 1) {
+    img1 = await getLoader().loadIndex(seriesId, 1);
+  }
+  return [img0, img1];
+};
+
+const generateDicomInfo = async (seriesInfo: SeriesInfo, elm: HTMLCanvasElement) => {
+  console.log('init dicom info');
+
+  const elmEx = elm as HTMLCanvasElementEx;
+  elmEx.dicomInfo = 'loading' as unknown as DicomInfo;
+  const imgs = await getBeginImages(seriesInfo);
+  const ret: any = {};
+  dispatchEvent(elm, VIEWPORT_EVENT_TYPES.DICOM_INFO_CHANGE);
 };
 
 const generateImageData = (renderData: RenderData, wwwc: WWWC): ImageData => {
@@ -80,6 +103,14 @@ const setTransform = (ctx: CanvasRenderingContext2D, transformOptions: Transform
   return transform;
 };
 
+const updateElm = (elm: HTMLCanvasElement, transform: Transform, renderData: RenderData, render: (...args: Array<any>) => any) => {
+  const elmEx = elm as HTMLCanvasElementEx;
+  elmEx.transform = transform;
+  elmEx.image = renderData;
+  elmEx.refresh = () => render(renderData, { elm });
+  elmEx.getImageId = () => renderData.imageId;
+};
+
 const basicRender: RenderFunction = (renderData: RenderData, options: RenderOptions): boolean => {
   if (!renderData) {
     return false;
@@ -95,6 +126,16 @@ const basicRender: RenderFunction = (renderData: RenderData, options: RenderOpti
   if (!elmEx.displayState) {
     const defaultDisplayState = generateDisplayState(renderData, elm, displayState);
     elmEx.displayState = { ...defaultDisplayState, ...displayState };
+    dispatchEvent(elm, EVENT_TYPES.RENDERED);
+    dispatchEvent(elm, VIEWPORT_EVENT_TYPES.DISPLAY_STATE_CHANGE);
+  }
+  if (elmEx.needUpdateDisplayState) {
+    elmEx.needUpdateDisplayState = false;
+    dispatchEvent(elm, VIEWPORT_EVENT_TYPES.DISPLAY_STATE_CHANGE);
+  }
+
+  if (!elmEx.dicomInfo) {
+    generateDicomInfo('renderData', elm);
   }
 
   const { offset, angle, scale, hflip, vflip, wwwc } = elmEx.displayState;
@@ -121,9 +162,8 @@ const basicRender: RenderFunction = (renderData: RenderData, options: RenderOpti
   const transform = setTransform(ctx, transformOptions);
 
   ctx.drawImage(renderCanvas, 0, 0, columns, rows, 0, 0, columns, rows);
-  elmEx.transform = transform;
-  elmEx.image = renderData;
-  elmEx.refresh = () => basicRender(elmEx.image, { elm });
+
+  updateElm(elm, transform, renderData, basicRender);
 
   dispatchEvent(elm, EVENT_TYPES.RENDERED);
   return true;

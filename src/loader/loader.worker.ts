@@ -112,8 +112,8 @@ const load = async () => {
 
   if (rets.length > 0) {
     const data = rets.map((ret, index) => {
-      const tmp = createImageData({ type, data: ret, extendData: { id: urls[index], studyId, seriesId } });
-      return { imageId: urls[index], seriesId, studyId, ...tmp };
+      const tmp = createImageData({ type, data: ret, extendData: { imageId: urls[index], studyId, seriesId } });
+      return { seriesId, studyId, ...tmp };
     });
     ctx.postMessage({ event: 'LOADED', data });
     clearInvalidQueue();

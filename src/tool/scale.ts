@@ -2,6 +2,7 @@
 import TOOL_TYPES from '@src/const/toolTypes';
 import { HandlerEvent } from '@src/event/tools';
 import { HTMLCanvasElementEx } from '@src/viewportsManager';
+import { addQueue } from '@src/scheduler';
 import Base from './base';
 
 class WWWC extends Base {
@@ -36,7 +37,9 @@ class WWWC extends Base {
     const factor = oldFactor + ticks;
     tmpScale = Math.pow(pow, factor);
     displayState.scale = tmpScale;
-    refresh();
+    target.needUpdateDisplayState = true;
+
+    addQueue(refresh);
   }
 }
 

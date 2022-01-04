@@ -1,6 +1,7 @@
 import TOOL_TYPES from '@src/const/toolTypes';
 import { HandlerEvent } from '@src/event/tools';
 import { HTMLCanvasElementEx } from '@src/viewportsManager';
+import { addQueue } from '@src/scheduler';
 import Base from './base';
 
 class WWWC extends Base {
@@ -17,7 +18,6 @@ class WWWC extends Base {
       coords: { pageX, pageY },
     } = e.detail;
     this.points = { x: pageX, y: pageY };
-    console.log(e.target, e.detail.coords);
   }
 
   touchmove(e: HandlerEvent) {
@@ -32,9 +32,9 @@ class WWWC extends Base {
     const { displayState, refresh } = target;
     displayState.wwwc!.ww += deltaX;
     displayState.wwwc!.wc += deltaY;
-    console.log('displayState.wwwc', displayState.wwwc);
+    target.needUpdateDisplayState = true;
 
-    refresh();
+    addQueue(refresh);
   }
 }
 

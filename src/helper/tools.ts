@@ -22,6 +22,17 @@ function throttle(fun: any, delay: number, ctx?: any): any {
   };
 }
 
+function doSetInterval(fn: (...args: Array<any>) => any, timespan: number) {
+  if (fn()) {
+    const timerId = setInterval(() => {
+      const ret = fn();
+      if (!ret) {
+        clearInterval(timerId);
+      }
+    }, timespan);
+  }
+}
+
 function getNumberValues(dataSet: DataSet, tag: string, minimumLength = 0): any {
   const values: Array<any> = [];
   const valueAsString = dataSet.string(tag);
@@ -110,4 +121,4 @@ const getComporessionState = ({ lossyImageCompression, lossyImageCompressionRati
   return 'Lossless / Uncompressed';
 };
 
-export { debounce, throttle, getNumberValues, getNumberValue, stringGBK, stringUTF8, getComporessionState };
+export { debounce, throttle, doSetInterval, getNumberValues, getNumberValue, stringGBK, stringUTF8, getComporessionState };

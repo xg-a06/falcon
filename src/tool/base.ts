@@ -3,6 +3,25 @@
 // passive	2激活但是只更新
 // active   3激活但是增加、更新、显示
 
+const defaultOptions = {
+  style: {
+    fontSize: 14,
+    fontFamliy: 'Arial',
+    lineWidth: 2,
+    fontColor: 'rgba(67, 199, 246,1)',
+    activeFontColor: 'rgba(144, 255, 222,1)',
+    strokeColor: 'rgba(67, 199, 246,1)',
+    activeStrokeColor: 'rgba(144, 255, 222,1)',
+    shadowColor: 'rgba(0,0,0,0.8)',
+    shadowBlur: 0,
+    shadowOffsetX: 1,
+    shadowOffsetY: 1,
+    handler: {
+      r: 5,
+    },
+    activeDistance: 5,
+  },
+};
 class Base {
   options: any;
 
@@ -12,7 +31,7 @@ class Base {
 
   _level: number;
 
-  constructor(target: HTMLCanvasElement, options: any, defaultOptions: any = {}) {
+  constructor(target: HTMLCanvasElement, options: any) {
     this.options = { ...options, ...defaultOptions };
     this.target = target;
     this.toolType = '';
@@ -53,11 +72,19 @@ class Base {
     // 刷新
   }
 
-  getTarget(): HTMLCanvasElement {
-    if (this.target === undefined) {
-      throw new Error('get tool target error');
+  getContext(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
+    const ctx = canvas.getContext('2d');
+    if (ctx === null) {
+      throw new Error('get context error');
     }
-    return this.target;
+    const { style } = this.options;
+    ctx.fillStyle = style.fontColor;
+    ctx.strokeStyle = style.strokeColor;
+    ctx.shadowColor = style.shadowColor;
+    ctx.shadowBlur = style.shadowBlur;
+    ctx.shadowOffsetX = style.shadowOffsetX;
+    ctx.shadowOffsetY = style.shadowOffsetY;
+    return ctx;
   }
 
   // getFont(scale = 1) {

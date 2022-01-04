@@ -205,5 +205,12 @@ class Loader {
     delete tasksMap[seriesId];
   }
 }
+let loader: Loader | any = null;
+const getLoader = (): Loader => {
+  if (loader === null) {
+    loader = new Loader();
+  }
+  return loader;
+};
 
-export default Loader;
+export default getLoader;
