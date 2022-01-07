@@ -32,8 +32,7 @@ class WWWC extends Base {
     const { displayState, refresh } = target;
     displayState.wwwc!.ww += deltaX;
     displayState.wwwc!.wc += deltaY;
-    target.needUpdateDisplayState = true;
-
+    target.displayStateChanged = true;
     addQueue(refresh);
   }
 }

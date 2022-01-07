@@ -1,10 +1,12 @@
+/* eslint-disable prefer-const */
+import { mat3 } from 'gl-matrix';
 import { EVENT_TYPES, VIEWPORT_EVENT_TYPES } from '@src/const/eventTypes';
+import { PATIENT_ORIENTATION_MAP } from '@src/const/index';
 import { ImageData as RenderData } from '@src/loader/imageData';
 import getLoader from '@src/loader/index';
 import Transform from '@src/helper/transform';
 import { HTMLCanvasElementEx, DisplayState, DicomInfo, SeriesInfo } from '@src/viewportsManager';
 import { dispatchEvent } from '@src/event/tools';
-import { doSetInterval } from '@src/helper/tools';
 import { getVoiLUTData, WWWC } from '@src/helper/lut';
 
 export interface RenderOptions {
@@ -42,23 +44,85 @@ const generateDisplayState = (renderData: RenderData, elm: HTMLCanvasElement, in
 const getBeginImages = async (seriesInfo: SeriesInfo) => {
   const { seriesId, count } = seriesInfo;
   const loader = getLoader();
-  let img0;
+
   let img1;
-  if (count === 1) {
-    img0 = await loader.loadIndex(seriesId, 0);
-  } else if (count > 1) {
-    img1 = await getLoader().loadIndex(seriesId, 1);
+  const img0 = await loader.getCacheDataByIndex({ seriesId, value: 0 });
+  if (count > 1) {
+    img1 = await getLoader().getCacheDataByIndex({ seriesId, value: 1 });
   }
   return [img0, img1];
 };
 
-const generateDicomInfo = async (seriesInfo: SeriesInfo, elm: HTMLCanvasElement) => {
-  console.log('init dicom info');
+const getOrientation = (imgs: Array<RenderData | undefined>, options: any) => {
+  const { hflip, vflip, angle } = options;
+  let a0 = 'I';
+  const {
+    instanceNumber: instanceNumber0,
+    imagePositionPatient: [, , imagePositionPatientZ0],
+  } = imgs[0]!;
+  if (imgs[1]) {
+    const {
+      instanceNumber: instanceNumber1,
+      imagePositionPatient: [, , imagePositionPatientZ1],
+    } = imgs[1];
+    if (instanceNumber0 < instanceNumber1 && imagePositionPatientZ0 > imagePositionPatientZ1) {
+      a0 = 'S';
+    }
+  }
+  let { imageOrientationPatient } = imgs[0]!;
+  imageOrientationPatient = imageOrientationPatient.map(Math.round);
+  const reset = imageOrientationPatient as [number, number, number, number, number, number];
+  const source = mat3.fromValues(...reset, 0, 0, 1);
 
+  let result = mat3.scale(mat3.create(), source, [hflip ? -1 : 1, vflip ? -1 : 1]);
+  result = mat3.rotate(mat3.create(), result, (angle * Math.PI) / 180);
+  let ret = result.map(i => {
+    if ((i < 0.000001 && i > 0) || (i > -0.000001 && i < 0) || i === 0) {
+      return 0;
+    }
+    return i;
+  });
+  const key1 = `${ret[3]}_${ret[4]}_${ret[5]}` as keyof typeof PATIENT_ORIENTATION_MAP;
+  const key2 = `${ret[0]}_${ret[1]}_${ret[2]}` as keyof typeof PATIENT_ORIENTATION_MAP;
+  const arr1 = PATIENT_ORIENTATION_MAP[key1];
+  const arr2 = PATIENT_ORIENTATION_MAP[key2];
+  return {
+    orientation: [a0, arr1[0], arr2[0], arr1[1], arr2[1]],
+    orientationPatient: imgs[0]!.imageOrientationPatient,
+  };
+};
+const generateDicomInfo = async (seriesInfo: SeriesInfo, elm: HTMLCanvasElement) => {
   const elmEx = elm as HTMLCanvasElementEx;
   elmEx.dicomInfo = 'loading' as unknown as DicomInfo;
-  const imgs = await getBeginImages(seriesInfo);
-  const ret: any = {};
+  let [img0, img1] = await getBeginImages(seriesInfo);
+  img0 = img0 as RenderData;
+  let { columnPixelSpacing, rowPixelSpacing, sliceThickness: originSliceThickness, spacingBetweenSlices: originSpacingBetweenSlices, imagePositionPatient } = img0;
+
+  if (!originSpacingBetweenSlices && img1) {
+    const {
+      imagePositionPatient: [, , z1],
+    } = img1;
+    originSpacingBetweenSlices = Math.abs((z1 - imagePositionPatient[2]) / (img1.instanceNumber - img0.instanceNumber));
+  }
+
+  if (!originSliceThickness && originSpacingBetweenSlices) {
+    originSliceThickness = originSpacingBetweenSlices;
+  }
+
+  const { orientation, orientationPatient } = getOrientation([img0, img1], elmEx.displayState);
+  const dicomInfo: DicomInfo = {
+    columnPixelSpacing,
+    rowPixelSpacing,
+    sliceThickness: originSliceThickness,
+    spacingBetweenSlices: originSpacingBetweenSlices,
+    originSliceThickness,
+    originSpacingBetweenSlices,
+    imagePositionPatient,
+    orientation,
+    orientationPatient,
+  };
+
+  elmEx.dicomInfo = dicomInfo;
   dispatchEvent(elm, VIEWPORT_EVENT_TYPES.DICOM_INFO_CHANGE);
 };
 
@@ -115,7 +179,7 @@ const basicRender: RenderFunction = (renderData: RenderData, options: RenderOpti
   if (!renderData) {
     return false;
   }
-  const { elm, displayState = {} } = options;
+  const { elm, displayState = {}, seriesInfo } = options;
 
   const { width, height } = getElmSize(elm);
   if (width === 0 || height === 0) {
@@ -124,6 +188,7 @@ const basicRender: RenderFunction = (renderData: RenderData, options: RenderOpti
   const elmEx = elm as HTMLCanvasElementEx;
 
   if (!elmEx.displayState) {
+    elmEx.initDisplayState = displayState;
     const defaultDisplayState = generateDisplayState(renderData, elm, displayState);
     elmEx.displayState = { ...defaultDisplayState, ...displayState };
     dispatchEvent(elm, EVENT_TYPES.RENDERED);
@@ -133,9 +198,13 @@ const basicRender: RenderFunction = (renderData: RenderData, options: RenderOpti
     elmEx.needUpdateDisplayState = false;
     dispatchEvent(elm, VIEWPORT_EVENT_TYPES.DISPLAY_STATE_CHANGE);
   }
+  if (!elmEx.seriesInfo) {
+    elmEx.seriesInfo = seriesInfo;
+    dispatchEvent(elm, VIEWPORT_EVENT_TYPES.SERIES_INFO_CHANGE);
+  }
 
   if (!elmEx.dicomInfo) {
-    generateDicomInfo('renderData', elm);
+    generateDicomInfo(elmEx.seriesInfo, elm);
   }
 
   const { offset, angle, scale, hflip, vflip, wwwc } = elmEx.displayState;

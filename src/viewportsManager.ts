@@ -3,6 +3,7 @@ import { ImageData as RenderData } from '@src/loader/imageData';
 import Transform from '@src/helper/transform';
 import { EventHandler } from '@src/event/tools';
 import { mousemoveHandler, mousedownHandler } from '@src/event/mouseEventHandler';
+import { addQueue } from './scheduler';
 
 interface DisplayState {
   hflip: boolean;
@@ -34,7 +35,9 @@ interface SeriesInfo {
 
 interface HTMLCanvasElementEx extends HTMLCanvasElement {
   displayState: DisplayState;
-  needUpdateDisplayState: boolean;
+  initDisplayState: Partial<DisplayState>;
+  displayStateChanged: boolean;
+  seriesInfo: SeriesInfo;
   dicomInfo: DicomInfo;
   image: RenderData;
   transform: Transform;
@@ -63,6 +66,12 @@ const viewportManager = {
     this.elements.delete(canvas);
     this.detachEvent(canvas);
     this.detachListener(canvas);
+  },
+  reset(elm: HTMLCanvasElement) {
+    const canvas = elm as any;
+    delete canvas.displayState;
+    const { refresh } = canvas;
+    addQueue(refresh);
   },
   attachEvent(canvas: HTMLCanvasElement) {
     canvas.addEventListener('mousedown', mousedownHandler);

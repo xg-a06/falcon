@@ -1,4 +1,7 @@
+/* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import * as dat from 'dat.gui';
+
 import getLoader, { Tasks, QueryObj } from '@src/loader';
 import { VIEWPORT_EVENT_TYPES } from '@src/const/eventTypes';
 import Tool_Types from '@src/const/toolTypes';
@@ -17,7 +20,6 @@ const tasks: Tasks = {
 };
 
 const loader = getLoader();
-window.loader = loader;
 loader.addTasks(tasks);
 
 const elm1 = document.getElementById('scene1') as HTMLCanvasElement;
@@ -49,6 +51,9 @@ elm1.addEventListener(VIEWPORT_EVENT_TYPES.DISPLAY_STATE_CHANGE, (e: any) => {
 elm1.addEventListener(VIEWPORT_EVENT_TYPES.DICOM_INFO_CHANGE, (e: any) => {
   console.log('DICOM_INFO_CHANGE', e.target.dicomInfo);
 });
+elm1.addEventListener(VIEWPORT_EVENT_TYPES.SERIES_INFO_CHANGE, (e: any) => {
+  console.log('SERIES_INFO_CHANGE', e.target.seriesInfo);
+});
 viewportsManager.enable(elm2);
 toolsManager.activeTool(elm2, Tool_Types.LENGTH);
 // toolsManager.activeTool(elm2, Tool_Types.LENGTH);
@@ -65,3 +70,19 @@ const query: QueryObj = {
   value: 10,
 };
 test(query);
+
+window.loader = loader;
+window.viewportsManager = viewportsManager;
+
+function initDebugger() {
+  const testObj = {
+    tool: 'wwwc',
+  };
+
+  const gui = new dat.GUI();
+  gui.add(testObj, 'tool', ['wwwc', 'scale']).onChange(() => {
+    console.log(testObj.tool);
+  });
+}
+
+initDebugger();

@@ -37,7 +37,7 @@ class WWWC extends Base {
     const factor = oldFactor + ticks;
     tmpScale = Math.pow(pow, factor);
     displayState.scale = tmpScale;
-    target.needUpdateDisplayState = true;
+    target.displayStateChanged = true;
 
     addQueue(refresh);
   }
