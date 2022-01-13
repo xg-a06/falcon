@@ -194,8 +194,8 @@ const basicRender: RenderFunction = (renderData: RenderData, options: RenderOpti
     dispatchEvent(elm, EVENT_TYPES.RENDERED);
     dispatchEvent(elm, VIEWPORT_EVENT_TYPES.DISPLAY_STATE_CHANGE);
   }
-  if (elmEx.needUpdateDisplayState) {
-    elmEx.needUpdateDisplayState = false;
+  if (elmEx.displayStateChanged) {
+    elmEx.displayStateChanged = false;
     dispatchEvent(elm, VIEWPORT_EVENT_TYPES.DISPLAY_STATE_CHANGE);
   }
   if (!elmEx.seriesInfo) {

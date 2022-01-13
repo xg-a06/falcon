@@ -14,12 +14,14 @@ const toolConstructors: Record<string, Constructor<any>> = {
 };
 
 const toolsManager = {
-  stateHandler(elm: HTMLCanvasElement, state: number, toolType: valueof<TOOLTYPES>, options: any = {}) {
+  stateHandler(elm: HTMLCanvasElement, state: number, toolType: valueof<TOOLTYPES>, options: any = undefined) {
     const canvas = elm as HTMLCanvasElementEx;
     let targetTool = canvas.tools.find(tool => tool.toolType === toolType);
     if (targetTool === undefined) {
       targetTool = new toolConstructors[toolType](options);
       canvas.tools.push(targetTool);
+    } else if (options !== undefined) {
+      targetTool.setOptions(options);
     }
     if (canvas.toolsData[toolType] === undefined) {
       canvas.toolsData[toolType] = {};

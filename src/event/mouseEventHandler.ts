@@ -2,25 +2,27 @@ import { EVENT_TYPES } from '@src/const/eventTypes';
 import { dispatchEvent, check } from '@src/event/tools';
 
 const mousemoveHandler = (e: any) => {
-  const { target } = e;
+  const { target, button } = e;
   const coords = check(target, e);
   if (coords === false) {
     return;
   }
   const detail = {
     coords,
+    button,
   };
   dispatchEvent(e.target, EVENT_TYPES.MOUSEMOVE, detail);
 };
 
 const mousedownHandler = (e: any) => {
-  const { target } = e;
+  const { target, button } = e;
   const coords = check(target, e);
   if (coords === false) {
     return;
   }
   const detail = {
     coords,
+    button,
   };
   dispatchEvent(target, EVENT_TYPES.TOUCHDOWN, detail);
 
@@ -31,6 +33,7 @@ const mousedownHandler = (e: any) => {
     }
     const moveDetail = {
       coords: moveCoords,
+      button,
     };
 
     dispatchEvent(target, EVENT_TYPES.TOUCHMOVE, moveDetail);
@@ -43,6 +46,7 @@ const mousedownHandler = (e: any) => {
     }
     const upDetail = {
       coords: upCoords,
+      button,
     };
     dispatchEvent(target, EVENT_TYPES.TOUCHUP, upDetail);
     document.removeEventListener('mousemove', touchmoveHandler);

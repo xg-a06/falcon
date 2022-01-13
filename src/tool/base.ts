@@ -21,6 +21,7 @@ const defaultOptions = {
     },
     activeDistance: 5,
   },
+  button: 0,
 };
 class Base {
   options: any;
@@ -29,13 +30,16 @@ class Base {
 
   toolType: string;
 
+  button: number;
+
   _level: number;
 
-  constructor(target: HTMLCanvasElement, options: any) {
+  constructor(target: HTMLCanvasElement, options: any = {}) {
     this.options = { ...options, ...defaultOptions };
     this.target = target;
     this.toolType = '';
     this._level = 0;
+    this.button = this.options.button;
   }
 
   get active() {
@@ -69,6 +73,8 @@ class Base {
 
   setOptions(options: any) {
     this.options = { ...this.options, ...options };
+    const { button = 0 } = this.options;
+    this.button = button;
     // 刷新
   }
 

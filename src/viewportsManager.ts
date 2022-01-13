@@ -75,6 +75,9 @@ const viewportManager = {
   },
   attachEvent(canvas: HTMLCanvasElement) {
     canvas.addEventListener('mousedown', mousedownHandler);
+    canvas.addEventListener('contextmenu', e => {
+      e.preventDefault();
+    });
   },
   detachEvent(canvas: HTMLCanvasElement) {
     canvas.removeEventListener('mousedown', mousedownHandler);

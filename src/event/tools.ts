@@ -17,6 +17,7 @@ interface HandlerEvent extends Event {
   target: HTMLCanvasElementEx;
   detail: {
     coords: Coords;
+    button: number;
   };
 }
 
@@ -56,8 +57,11 @@ const EventHandler = (e: Event) => {
   const event = e as HandlerEvent;
   const { type, target } = event;
   const action = getAction(type);
+
   target.tools.forEach((tool: any) => {
-    if (tool.level >= EVENT_LEVELS[type] && tool[action]) {
+    if (tool.level >= EVENT_LEVELS[type] && tool[action] && (tool.button === 0 || event.detail.button === tool.button)) {
+      console.log(type, tool.button, event.detail.button);
+
       tool[action](e);
     }
   });
