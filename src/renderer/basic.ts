@@ -234,7 +234,7 @@ const basicRender: RenderFunction = (renderData: RenderData, options: RenderOpti
 
   updateElm(elm, transform, renderData, basicRender);
 
-  dispatchEvent(elm, EVENT_TYPES.RENDERED);
+  dispatchEvent(elm, EVENT_TYPES.RENDERED, { button: -1 });
   return true;
 };
 

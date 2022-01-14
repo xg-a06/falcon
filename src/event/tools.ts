@@ -59,9 +59,7 @@ const EventHandler = (e: Event) => {
   const action = getAction(type);
 
   target.tools.forEach((tool: any) => {
-    if (tool.level >= EVENT_LEVELS[type] && tool[action] && (tool.button === 0 || event.detail.button === tool.button)) {
-      console.log(type, tool.button, event.detail.button);
-
+    if (tool.level >= EVENT_LEVELS[type] && tool[action] && (event.detail.button === -1 || event.detail.button === tool.button)) {
       tool[action](e);
     }
   });

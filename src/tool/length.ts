@@ -31,6 +31,7 @@ class Length extends Handler {
       coords: { offsetX, offsetY },
     } = e.detail;
     this.handlers.end = { x: offsetX, y: offsetY };
+
     const { refresh } = target;
     addQueue(refresh);
   }
