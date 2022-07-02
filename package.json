@@ -1,7 +1,7 @@
 {
-  "name": "tpl",
+  "name": "falcon",
   "version": "0.1.0",
-  "description": "a template for lib with ts",
+  "description": "a small and fast medicine viewer sdk by react",
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "prepare": "husky install",

@@ -15,8 +15,5 @@
     "@avsb/cli": "^0.1.5",
     "glob": "^8.0.3"
   },
-  "dependencies": {
-    "@tpl/modulea": "workspace:^0.1.0",
-    "@tpl/moduleb": "workspace:^0.1.0"
-  }
+  "dependencies": {}
 }
