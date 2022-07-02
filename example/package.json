@@ -1,0 +1,22 @@
+{
+  "name": "@tpl/example",
+  "version": "0.1.0",
+  "description": "example",
+  "scripts": {
+    "start": "avsb serve",
+    "build": "avsb build",
+    "preview": "avsb preview",
+    "clean": "rimraf ./node_modules"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@avsb/cli": "^0.1.5",
+    "glob": "^8.0.3"
+  },
+  "dependencies": {
+    "@tpl/modulea": "workspace:^0.1.0",
+    "@tpl/moduleb": "workspace:^0.1.0"
+  }
+}

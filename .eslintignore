@@ -1,0 +1,7 @@
+/build/
+node_modules
+/dist/
+/*.js
+**/dist/*.js
+**/bin/*.js
+README.md
