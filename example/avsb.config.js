@@ -1,8 +1,9 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable import/no-extraneous-dependencies */
 const glob = require('glob');
+const path = require('path');
 
-const indexs = glob('*/index.ts', { sync: true });
+const indexs = glob('*/index.ts[x]', { sync: true });
 const htmlPlugins = [];
 const entries = indexs.reduce((ret, file) => {
   const [dir] = file.split('/');
@@ -30,6 +31,11 @@ const config = {
   },
   path: {
     tplPath: htmlPlugins,
+  },
+  override(options) {
+    delete options.module.rules[1].include;
+    options.module.rules[1].exclude = [path.resolve(__dirname, 'node_modules')];
+    return options;
   },
 };
 

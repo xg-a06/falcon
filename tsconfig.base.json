@@ -1,10 +1,14 @@
 {
   "compilerOptions": {
-    "target": "esnext",
+    "target": "ESNext",
     "lib": [
-      "esnext"
+      "DOM",
+      "ESNext"
     ],
-    "types": ["../../typings/","node"],
+    "types": [
+      "../../typings/"
+    ],
+    "jsx": "react",
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -13,11 +17,11 @@
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "resolveJsonModule": true,
     "experimentalDecorators": true, //启用装饰器
     "emitDecoratorMetadata": true, //启用装饰器提供元数据的支持
-    "downlevelIteration": true,    //启用扩展运算符
+    "downlevelIteration": true, //启用扩展运算符
   }
 }

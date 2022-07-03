@@ -22,7 +22,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx",
+    "jsx": "react",
     "plugins": [
       {
         "name": "typescript-plugin-css-modules",
@@ -33,6 +33,7 @@
     ],
   },
   "include": [
+    "**/*.tsx",
     "**/*.ts"
   ]
 }
