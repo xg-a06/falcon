@@ -1,20 +1,31 @@
-import React, { useRef } from 'react';
-import useEventLister from '../hooks/useEventLister';
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import React, { useRef, useState } from 'react';
+import { useEventLister, useUniqueId, useDebounceEffect } from '../hooks';
 import { Viewport2DContainer, IFrameResizer } from './style';
 
 const Viewport2D = () => {
-  const frameResizerRef = useRef<HTMLIFrameElement>(null);
+  const [size, setSize] = useState([0, 0]);
 
-  useEventLister(frameResizerRef.current?.contentWindow, 'resize', e => {
+  const id = useUniqueId();
+  const frameResizerRef = useRef<HTMLIFrameElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useDebounceEffect(() => {
+    const [width, height] = size;
+    canvasRef.current!.width = width;
+    canvasRef.current!.height = height;
+  }, [size]);
+
+  useEventLister(frameResizerRef, 'resize', e => {
     const window = e.currentTarget as Window;
     const { offsetWidth, offsetHeight } = window.document.documentElement;
-    console.log(offsetWidth, offsetHeight);
+    setSize([offsetWidth, offsetHeight]);
   });
 
   return (
     <Viewport2DContainer>
+      <canvas ref={canvasRef} />
       <IFrameResizer ref={frameResizerRef} />
-      <canvas />
     </Viewport2DContainer>
   );
 };

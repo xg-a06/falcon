@@ -25,5 +25,8 @@
     "build": "rimraf ./dist && tsc --module commonjs --outDir dist",
     "clean": "rimraf ./node_modules"
   },
-  "devDependencies": {}
+  "dependencies": {
+    "@types/uuid": "^8.3.4",
+    "uuid": "^8.3.2"
+  }
 }

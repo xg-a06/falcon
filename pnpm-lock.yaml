@@ -83,13 +83,25 @@ importers:
     specifiers: {}
 
   packages/loader:
-    specifiers: {}
+    specifiers:
+      '@falcon/utils': workspace:^0.1.0
+      dicom-parser: ^1.8.13
+      gl-matrix: ^3.4.3
+    dependencies:
+      '@falcon/utils': link:../utils
+      dicom-parser: 1.8.13
+      gl-matrix: 3.4.3
 
   packages/renderer:
     specifiers: {}
 
   packages/viewport:
-    specifiers: {}
+    specifiers:
+      '@types/uuid': ^8.3.4
+      uuid: ^8.3.2
+    dependencies:
+      '@types/uuid': 8.3.4
+      uuid: 8.3.2
 
 packages:
 
@@ -104,7 +116,7 @@ packages:
   /@avsb/build/0.1.7:
     resolution: {integrity: sha512-4Tsrd5H0lmgnpYV5WpzvfUAl6mBmbTKdlrhKDHCu4FXHZ3m4/3skPPSIbWwr7E9qdTgKfT51aumCQ/YttU7ZGw==}
     dependencies:
-      '@avsb/utils': 0.1.7
+      '@avsb/utils': 0.1.8
       webpack: 5.72.1
     transitivePeerDependencies:
       - '@parcel/css'
@@ -137,7 +149,7 @@ packages:
       '@avsb/build': 0.1.7
       '@avsb/preview': 0.1.6
       '@avsb/serve': 0.1.7
-      '@avsb/utils': 0.1.7
+      '@avsb/utils': 0.1.8
       '@types/node': 18.0.0
       commander: 9.3.0
     transitivePeerDependencies:
@@ -168,7 +180,7 @@ packages:
   /@avsb/preview/0.1.6:
     resolution: {integrity: sha512-bUxLYTlgNcaUeQYM8lmhDbyCF48IW1tcfEzkW+O0py/Pzqy4ICDqcInJ/HpWLPdgMRcQIVFjBEfM/VDdc5od+g==}
     dependencies:
-      '@avsb/utils': 0.1.7
+      '@avsb/utils': 0.1.8
       '@types/koa': 2.13.4
       '@types/koa-static': 4.0.2
       chalk: 4.0.0
@@ -204,7 +216,7 @@ packages:
   /@avsb/serve/0.1.7:
     resolution: {integrity: sha512-HKEfzomgT9qBqB2okyCEVLay8KxFLidU+pJfH5vvT7W2bVfcCOlhbYTDtd0zJXN3Q63B7lnaVlfHdxziw2vCeg==}
     dependencies:
-      '@avsb/utils': 0.1.7
+      '@avsb/utils': 0.1.8
     transitivePeerDependencies:
       - '@parcel/css'
       - '@swc/core'
@@ -229,8 +241,8 @@ packages:
       - webpack-plugin-serve
     dev: true
 
-  /@avsb/utils/0.1.7:
-    resolution: {integrity: sha512-RdMsqZkSZMwQR8MlWirWxCZXwFbfml+Qv3MjJTfXL34Yd8Ah6as2yzVSjamjJXcYRxc8yYHbGqgfZ7g1GIpm5A==}
+  /@avsb/utils/0.1.8:
+    resolution: {integrity: sha512-QLy7xVKxLGBtYlzECuN1nUGi9luBJ60qelcCLzIENUtKmi7Yw/WWXHkaG4u7tbTDrhPISvblpOBW/TEoZNx/FA==}
     dependencies:
       '@babel/core': 7.18.6
       '@babel/plugin-proposal-class-properties': 7.18.6_@babel+core@7.18.6
@@ -2885,6 +2897,10 @@ packages:
       source-map: 0.6.1
     dev: true
 
+  /@types/uuid/8.3.4:
+    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
+    dev: false
+
   /@types/webpack-bundle-analyzer/4.4.1:
     resolution: {integrity: sha512-yQAj3l7bIYL+QRRlNJt6gyP+zrXZOlgaR4wsX0WY4yzZIbv41ZibREfZvuYjxY0iVtvQQlbhx0AeokkCuqUAQg==}
     dependencies:
@@ -4485,6 +4501,10 @@ packages:
     resolution: {integrity: sha512-T0NIuQpnTvFDATNuHN5roPwSBG83rFsuO+MXXH9/3N1eFbn4wcPjttvjMLEPWJ0RGUYgQE7cGgS3tNxbqCGM7g==}
     dev: true
 
+  /dicom-parser/1.8.13:
+    resolution: {integrity: sha512-8M53FPHS4zM3zvu5fdIWdatqrjpiG2+2M6RJ0IxwqLF4gvCYRsqUIusxYaOiNU0sWaptUpnXeZiXunP0LOIcQw==}
+    dev: false
+
   /diff/4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
@@ -5430,6 +5450,10 @@ packages:
       split2: 3.2.2
       through2: 4.0.2
     dev: true
+
+  /gl-matrix/3.4.3:
+    resolution: {integrity: sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==}
+    dev: false
 
   /glob-parent/5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -9044,7 +9068,6 @@ packages:
   /uuid/8.3.2:
     resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
     hasBin: true
-    dev: true
 
   /v8-compile-cache-lib/3.0.1:
     resolution: {integrity: sha512-wa7YjyUGfNZngI/vtK0UHAN+lgDCxBPCylVXGp0zu59Fz5aiGtNXaq3DhIov063MorB+VfufLh3JlF2KdTK3xg==}

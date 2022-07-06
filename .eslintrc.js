@@ -34,6 +34,10 @@ module.exports = {
     ],
     'import/prefer-default-export': 0,
     'import/no-extraneous-dependencies': 0,
-    '@typescript-eslint/no-unused-vars': ['error'],
+    'no-unused-vars': 0,
+    '@typescript-eslint/no-unused-vars': 2,
+    'no-dupe-class-members': 0,
+    '@typescript-eslint/no-dupe-class-members': 2,
+    '@typescript-eslint/no-non-null-assertion': 0,
   },
 };
