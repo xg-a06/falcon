@@ -14,6 +14,8 @@ const useDebounce = (cb: Callback, delay: number) => {
     current.timer = setTimeout(() => {
       current.fn.call(this, ...args);
     }, delay);
+
+    return () => clearTimeout(current.timer);
   }, []);
 
   return debFn;

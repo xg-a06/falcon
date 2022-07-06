@@ -125,15 +125,15 @@ class AJAX {
   }
 }
 
-const client = (options: Partial<AJAXOptions>): Promise<any> => {
+const ajax = (options: Partial<AJAXOptions>): Promise<any> => {
   const op = { ...defaultOptions, ...options };
   const xhr = new AJAX(op);
   return xhr.request();
 };
 
-client.create = (options: Partial<AJAXOptions>): AJAX => {
+ajax.create = (options: Partial<AJAXOptions>): AJAX => {
   const op = { ...defaultOptions, ...options };
   return new AJAX(op);
 };
 
-export default client;
+export default ajax;

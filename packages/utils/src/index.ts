@@ -1,3 +1,3 @@
-import client from './client';
+import ajax from './ajax';
 
-export { client };
+export { ajax };

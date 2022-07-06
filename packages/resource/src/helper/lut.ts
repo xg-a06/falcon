@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { ImageData as RenderData } from '../loader/imageData';
+import { ImageData as RenderData } from '../client/imageData';
 
 export interface WWWC {
   ww: number;

@@ -1,6 +1,6 @@
 import useEvent from './useEvent';
-import useEventLister from './useEventLister';
+import useEventListener from './useEventListener';
 import useUniqueId from './useUniqueId';
 import { useDebounce, useDebounceEffect } from './useDebounce';
 
-export { useEvent, useEventLister, useUniqueId, useDebounce, useDebounceEffect };
+export { useEvent, useEventListener, useUniqueId, useDebounce, useDebounceEffect };

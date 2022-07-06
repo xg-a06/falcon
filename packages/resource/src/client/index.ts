@@ -30,18 +30,9 @@ function instanceOfTask(object: any): object is Tasks {
 }
 
 type PromiseCallbackFn = (callbackSeriesId: string, imageId: string, data: any) => void;
-interface LoaderOptions {
-  downloadWorkerMaxCount?: number;
-  cacheWorkerMaxCount?: number;
-}
-
-const defaultOptions: LoaderOptions = {
-  downloadWorkerMaxCount: 1,
-  cacheWorkerMaxCount: 1,
-};
 
 class Loader {
-  options: LoaderOptions = defaultOptions;
+  options: any = {};
 
   downloadWorkder: Worker;
 
@@ -51,9 +42,8 @@ class Loader {
 
   callbackProcess: Record<string, any> = {};
 
-  constructor(options?: LoaderOptions) {
+  constructor(options: any = {}) {
     this.options = { ...this.options, ...options };
-
     this.downloadWorkder = this.initDownloadWorker();
   }
 
@@ -205,7 +195,9 @@ class Loader {
     delete tasksMap[seriesId];
   }
 }
-let loader: Loader | any = null;
+
+let loader: Loader | null = null;
+
 const getLoader = (): Loader => {
   if (loader === null) {
     loader = new Loader();

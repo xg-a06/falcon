@@ -1,7 +1,7 @@
 {
-  "name": "@falcon/decoder",
+  "name": "@falcon/resource",
   "version": "0.1.0",
-  "description": "decoder module",
+  "description": "resource module",
   "main": "dist/index.js",
   "files": [
     "dist"
@@ -25,5 +25,9 @@
     "build": "rimraf ./dist && tsc --module commonjs --outDir dist",
     "clean": "rimraf ./node_modules"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@falcon/utils": "workspace:^0.1.0",
+    "dicom-parser": "^1.8.13",
+    "gl-matrix": "^3.4.3"
+  }
 }

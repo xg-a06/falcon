@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { ImageData } from '../loader/imageData';
+import { ImageData } from '../client/imageData';
 
 function decodeLittleEndian(metaData: ImageData, pixelData: Uint8Array): ImageData {
   let arrayBuffer = pixelData.buffer;

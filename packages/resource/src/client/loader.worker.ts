@@ -1,7 +1,7 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
 /* eslint-disable no-restricted-globals */
-import { client } from '@falcon/utils';
+import { ajax } from '@falcon/utils';
 import createImageData from './imageData';
 import { Tasks } from './index';
 
@@ -26,7 +26,7 @@ let isWorking = false;
 
 // 加载图片
 const loadImage = async (url: string): Promise<any> => {
-  const xhr = client.create({
+  const xhr = ajax.create({
     url,
     responseType: 'arraybuffer',
   });

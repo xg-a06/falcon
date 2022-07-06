@@ -16,6 +16,10 @@ const useThrottle = (cb: Callback, delay: number) => {
         current.timer = undefined;
       }, delay);
     }
+
+    return () => {
+      current.timer = undefined;
+    };
   }, []);
 
   return debFn;
