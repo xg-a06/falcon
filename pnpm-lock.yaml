@@ -79,10 +79,10 @@ importers:
       '@types/react-dom': 18.0.5
       glob: 8.0.3
 
-  packages/decoder:
+  packages/renderer:
     specifiers: {}
 
-  packages/loader:
+  packages/resource:
     specifiers:
       '@falcon/utils': workspace:^0.1.0
       dicom-parser: ^1.8.13
@@ -92,7 +92,10 @@ importers:
       dicom-parser: 1.8.13
       gl-matrix: 3.4.3
 
-  packages/renderer:
+  packages/tool:
+    specifiers: {}
+
+  packages/utils:
     specifiers: {}
 
   packages/viewport:

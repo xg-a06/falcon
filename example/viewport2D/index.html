@@ -8,5 +8,17 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      function pause() {
+        console.log('leave');
+      }
+
+      function play() {
+        console.log('in');
+      }
+
+      window.addEventListener('blur', pause);
+      window.addEventListener('focus', play);
+    </script>
   </body>
 </html>

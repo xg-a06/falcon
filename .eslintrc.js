@@ -39,5 +39,7 @@ module.exports = {
     'no-dupe-class-members': 0,
     '@typescript-eslint/no-dupe-class-members': 2,
     '@typescript-eslint/no-non-null-assertion': 0,
+    'no-plusplus': 0,
+    'no-restricted-globals': 0,
   },
 };

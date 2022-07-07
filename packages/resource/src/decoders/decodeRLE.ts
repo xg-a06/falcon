@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
-import { ImageData } from '../client/imageData';
+import { ImageData } from '../worker/imageData';
 
 function decode8(metaData: ImageData, pixelData: Uint8Array) {
   const frameData = pixelData;

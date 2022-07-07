@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-bitwise */
-import { ImageData } from '../client/imageData';
+import { ImageData } from '../worker/imageData';
 
 function swap16(val: any) {
   return ((val & 0xff) << 8) | ((val >> 8) & 0xff);

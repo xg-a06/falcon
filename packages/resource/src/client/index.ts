@@ -1,4 +1,4 @@
-import { ImageData } from './imageData';
+import { ImageData } from '../worker/imageData';
 import LoaderWorker from './loader.worker';
 
 // 目前新loader加载模式暂无优先级场景，先保留字段，后续有需要再加

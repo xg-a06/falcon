@@ -1,9 +1,6 @@
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-plusplus */
-/* eslint-disable no-restricted-globals */
 import { ajax } from '@falcon/utils';
 import createImageData from './imageData';
-import { Tasks } from './index';
+import { Tasks } from '../client/index';
 
 interface queueItem {
   seriesId: string;
@@ -38,13 +35,15 @@ const loadImage = async (url: string): Promise<any> => {
 };
 
 // 重试逻辑
-const retryLoadImage = (url: string, retry = 3): Promise<any> =>
-  loadImage(url)
+const retryLoadImage = (url: string, retry = 2): Promise<any> => {
+  let time = retry;
+  return loadImage(url)
     .then(image => image)
     .catch(error => {
       console.log(error);
-      return retry-- > 0 ? retryLoadImage(url, retry) : false;
+      return time > 0 ? retryLoadImage(url, --time) : false;
     });
+};
 
 // 获取任务
 const pickTask = () => {

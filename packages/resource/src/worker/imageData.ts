@@ -1,4 +1,4 @@
-import { parserDicom } from './parserFactory';
+import { parserDicom } from '../client/parserFactoryrFactory';
 
 export interface ImageData {
   imageId: string;
