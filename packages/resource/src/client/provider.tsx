@@ -1,39 +1,16 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
+import ResourceClient, { Tasks } from './resource';
 
+interface CustomTasks extends Tasks {
+  cacheKey: string;
+}
 interface ProviderProps {
   children: React.ReactNode;
-  client?: Record<string, never>;
+  client?: ResourceClient;
 }
 
-interface Tasks {
-  cacheKey: string;
-  studyId: string;
-  seriesId: string;
-  urls: Array<string>;
-  types?: string;
-  priority?: number;
-}
-
-interface QueryCache {
-  cacheKey: string;
-  value: number;
-}
-
-const RESOURCE_TYPES = {
-  DICOM: 'dicom',
-  JPEG: 'jpeg',
-  VTP: 'vtp',
-};
-
-const PRIORITY_TYPES = {
-  HIGH: 'high',
-  NORMAL: 'normal',
-  LOW: 'low',
-};
-
-const defaultClient = {};
-const ResourceContext = createContext({});
+const defaultClient = new ResourceClient();
+const ResourceContext = createContext(defaultClient);
 
 const ResourceProvider: React.FC<ProviderProps> = ({ client, children }) => {
   let resourceClient = defaultClient;
@@ -45,11 +22,15 @@ const ResourceProvider: React.FC<ProviderProps> = ({ client, children }) => {
 
 const useResourceClient = () => useContext(ResourceContext);
 
-const useResourceRequest = (tasks: Tasks) => useContext(ResourceContext);
+const useResourceRequest = (tasks: CustomTasks) => {
+  const client = useContext(ResourceContext);
+  useEffect(() => {
+    const { cacheKey, ...data } = tasks;
+    client.addTasks(cacheKey, data);
+  }, [tasks]);
+};
 
-const useResourceData = (query: QueryCache) => useContext(ResourceContext);
+// const useResourceData = (query: QueryCache) => useContext(ResourceContext);
 
-export { Tasks, QueryCache };
-export { RESOURCE_TYPES, PRIORITY_TYPES };
-export { useResourceClient, useResourceData, useResourceRequest };
+export { useResourceClient, useResourceRequest, CustomTasks };
 export default ResourceProvider;

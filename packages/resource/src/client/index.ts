@@ -1,5 +1,8 @@
+/* eslint-disable class-methods-use-this */
 import { ImageData } from '../worker/imageData';
-import LoaderWorker from './loader.worker';
+// import LoaderWorker from './loader.worker';
+const www = new Worker(URL.createObjectURL(new Blob(['../worker/loader.worker.ts'], { type: 'text/javascript' })), { type: 'module' });
+console.log('wwww', www);
 
 // 目前新loader加载模式暂无优先级场景，先保留字段，后续有需要再加
 export interface Tasks {
@@ -48,24 +51,24 @@ class Loader {
   }
 
   // 初始化下载线程
-  initDownloadWorker(): Worker {
-    const { callbackProcess } = this;
-    const worker = new LoaderWorker();
-    worker.addEventListener('message', e => {
-      const { event, data: cacheData } = e.data;
-      if (event === 'LOADED') {
-        cacheData.forEach((data: any) => {
-          const { seriesId, imageId } = data;
-          if (callbackProcess[imageId]) {
-            callbackProcess[imageId].callback(seriesId, imageId, data);
-          }
-          if (callbackProcess[seriesId]) {
-            callbackProcess[seriesId].callback(seriesId, imageId, data);
-          }
-        });
-      }
-    });
-    return worker;
+  initDownloadWorker(): any {
+    // const { callbackProcess } = this;
+    // const worker = new LoaderWorker();
+    // worker.addEventListener('message', e => {
+    //   const { event, data: cacheData } = e.data;
+    //   if (event === 'LOADED') {
+    //     cacheData.forEach((data: any) => {
+    //       const { seriesId, imageId } = data;
+    //       if (callbackProcess[imageId]) {
+    //         callbackProcess[imageId].callback(seriesId, imageId, data);
+    //       }
+    //       if (callbackProcess[seriesId]) {
+    //         callbackProcess[seriesId].callback(seriesId, imageId, data);
+    //       }
+    //     });
+    //   }
+    // });
+    // return worker;
   }
 
   addTasks(tasks: Tasks): void;

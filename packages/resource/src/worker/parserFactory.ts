@@ -7,7 +7,7 @@ import decodeLittleEndian from '../decoders/decodeLittleEndian';
 import decodeBigEndian from '../decoders/decodeBigEndian';
 import decodeRLE from '../decoders/decodeRLE';
 // import decodeJPEGLS from '../decoders/decodeJPEGLS';
-import { ImageData, ExtendData } from '../worker/imageDatamageData';
+import { ImageData, ExtendData } from './imageData';
 import Tags from '../tagMap';
 
 const getDicomData = (arrayBuffer: ArrayBuffer): DataSet | void => {

@@ -1,12 +1,11 @@
 import { ajax } from '@falcon/utils';
 import createImageData from './imageData';
-import { Tasks } from '../client/index';
 
 interface queueItem {
   seriesId: string;
   studyId: string;
   urls: Array<string>;
-  type?: string;
+  type: string;
 }
 
 // 任务队列
@@ -49,7 +48,7 @@ const retryLoadImage = (url: string, retry = 2): Promise<any> => {
 const pickTask = () => {
   const qItem = queues[0][0] || queues[1][0] || queues[2][0];
   if (qItem) {
-    const { seriesId, studyId, urls, type = 'DICOM' } = qItem;
+    const { seriesId, studyId, urls, type } = qItem;
     return { seriesId, studyId, urls: urls.splice(0, 6), type };
   }
   return undefined;
@@ -67,9 +66,9 @@ const clearInvalidQueue = () => {
 };
 
 // 添加任务到任务队列和任务map 以及调整优先级逻辑
-const addQueue = (data: Tasks) => {
+const addQueue = (data: any) => {
   const { seriesId, urls, priority = 2 } = data;
-  queues[priority].push(data);
+  queues[priority].push(data.tasks);
   // 处理提升优先级情况 目前只处理单张提前这种场景
   for (let p = 2; p > priority; p--) {
     const queue = queues[p];
@@ -112,7 +111,7 @@ const load = async () => {
   const rets = await Promise.all(works);
 
   if (rets.length > 0) {
-    const data = rets.map((ret, index) => {
+    const data = rets.map((ret: any, index: number) => {
       const tmp = createImageData({ type, data: ret, extendData: { imageId: urls[index], studyId, seriesId } });
       return { seriesId, studyId, ...tmp };
     });
@@ -132,13 +131,24 @@ ctx.addEventListener('message', async e => {
     abortQueue(data);
   }
 });
-
+// DedicatedWorkerGlobalScope
 // 简单处理worker引入问题
-class WebpackWorker extends Worker {
-  constructor() {
-    super('');
-    console.log('init');
-  }
-}
+// class WebpackWorker extends Worker {
+//   constructor() {
+//     super('');
+//     console.log('init');
+//   }
+// }
 
-export default WebpackWorker;
+// export default WebpackWorker;
+// eslint-disable-next-line no-undef
+// const self = globalThis as unknown as DedicatedWorkerGlobalScope;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+// self.onmessage = ({ data: { question } }) => {
+//   self.postMessage({
+//     answer: 42,
+//   });
+// };
+
+// export {};

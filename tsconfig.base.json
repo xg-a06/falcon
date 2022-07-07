@@ -6,9 +6,10 @@
       "ESNext"
     ],
     "types": [
-      "../../typings/"
+      "../../typings/",
+      "node"
     ],
-    "jsx": "react",
+    "jsx": "react-jsx",
     "allowJs": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
@@ -17,8 +18,9 @@
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
-    "module": "CommonJS",
+    "module": "ESNext",
     "moduleResolution": "Node",
+    "moduleDetection": "auto",
     "resolveJsonModule": true,
     "experimentalDecorators": true, //启用装饰器
     "emitDecoratorMetadata": true, //启用装饰器提供元数据的支持
