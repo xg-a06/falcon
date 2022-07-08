@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect } from 'react';
 import ResourceClient, { Tasks } from './resource';
 
-interface CustomTasks extends Tasks {
+export interface CustomTasks extends Tasks {
   cacheKey: string;
 }
 interface ProviderProps {
@@ -32,5 +32,5 @@ const useResourceRequest = (tasks: CustomTasks) => {
 
 // const useResourceData = (query: QueryCache) => useContext(ResourceContext);
 
-export { useResourceClient, useResourceRequest, CustomTasks };
+export { useResourceClient, useResourceRequest };
 export default ResourceProvider;

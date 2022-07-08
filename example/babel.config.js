@@ -50,7 +50,6 @@ const babelConfig = {
     ],
   ],
 };
-
 if (process.env.NODE_ENV === 'production') {
   babelConfig.plugins.shift();
 }

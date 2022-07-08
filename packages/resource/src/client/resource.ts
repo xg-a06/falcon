@@ -57,31 +57,12 @@ class ResourceClient {
     this.downloadWorkder = this.initDownloadWorker();
   }
 
-  initDownloadWorker(): any {
+  initDownloadWorker(): Worker {
     const { callbackProcess } = this;
-    // const worker = new Worker('../worker/loader.worker.js');
-    // worker.addEventListener('message', e => {
-    //   console.log('112312313', e);
-    // const { event, data: cacheData } = e.data;
-    // if (event === 'LOADED') {
-    // cacheData.forEach((data: any) => {
-    //   const { seriesId, imageId } = data;
-    //   if (callbackProcess[imageId]) {
-    //     callbackProcess[imageId].callback(seriesId, imageId, data);
-    //   }
-    //   if (callbackProcess[seriesId]) {
-    //     callbackProcess[seriesId].callback(seriesId, imageId, data);
-    //   }
-    // });
-    // }
-    // });
-    const worker = new Worker(new URL('../worker/loader.worker.js', import.meta.url));
-    worker.postMessage({
-      question: 'The Answer to the Ultimate Question of Life, The Universe, and Everything.',
+    const worker = new Worker(new URL('../worker/loader.worker', import.meta.url));
+    worker.addEventListener('message', e => {
+      // console.log('112312313', e);
     });
-    worker.onmessage = ({ data: { answer } }) => {
-      console.log(answer);
-    };
 
     return worker;
   }
@@ -102,7 +83,6 @@ class ResourceClient {
   loadData(cacheKey: string) {
     const { tasksMap, downloadWorkder } = this;
     const tasks = tasksMap[cacheKey];
-    console.log(tasks);
 
     downloadWorkder.postMessage({ event: 'LOAD', data: { cacheKey, tasks } });
   }

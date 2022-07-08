@@ -1,5 +1,6 @@
 import React from 'react';
 import { Viewport2D } from '@falcon/viewport';
+
 import './index.global.css';
 
 const App = () => (

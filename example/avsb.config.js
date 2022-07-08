@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 /* eslint-disable no-param-reassign */
 /* eslint-disable import/no-extraneous-dependencies */
 const glob = require('glob');
@@ -32,7 +33,13 @@ const config = {
   path: {
     tplPath: htmlPlugins,
   },
+  custom: {
+    experiments: {
+      lazyCompilation: false,
+    },
+  },
   override(options) {
+    options.module.rules[0].include.push(path.resolve(__dirname, '../packages'));
     delete options.module.rules[1].include;
     options.module.rules[1].exclude = [path.resolve(__dirname, 'node_modules')];
     return options;

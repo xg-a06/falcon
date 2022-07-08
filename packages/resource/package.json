@@ -22,7 +22,7 @@
   "homepage": "https://code.infervision.com/nirvana/falcon#readme",
   "scripts": {
     "start": "tsc -w",
-    "build": "rimraf ./dist && tsc --module commonjs --outDir dist",
+    "build": "rimraf ./dist && tsc  --outDir dist",
     "clean": "rimraf ./node_modules"
   },
   "dependencies": {

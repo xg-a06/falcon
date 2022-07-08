@@ -4,6 +4,7 @@ importers:
 
   .:
     specifiers:
+      '@babel/runtime': ^7.18.6
       '@changesets/cli': ^2.23.0
       '@commitlint/cli': ^17.0.3
       '@commitlint/config-conventional': ^17.0.3
@@ -15,6 +16,7 @@ importers:
       '@types/react-dom': ^18.0.5
       '@typescript-eslint/eslint-plugin': ^5.29.0
       '@typescript-eslint/parser': ^5.29.0
+      core-js: ^3.23.3
       eslint: ^8.18.0
       eslint-config-airbnb-base: ^15.0.0
       eslint-config-prettier: ^8.5.0
@@ -31,6 +33,7 @@ importers:
       rimraf: ^3.0.2
       typescript: ^4.7.4
     devDependencies:
+      '@babel/runtime': 7.18.6
       '@changesets/cli': 2.23.0
       '@commitlint/cli': 17.0.3
       '@commitlint/config-conventional': 17.0.3
@@ -42,6 +45,7 @@ importers:
       '@types/react-dom': 18.0.5
       '@typescript-eslint/eslint-plugin': 5.30.0_5mtqsiui4sk53pmkx7i7ue45wm
       '@typescript-eslint/parser': 5.30.0_b5e7v2qnwxfo6hmiq56u52mz3e
+      core-js: 3.23.3
       eslint: 8.18.0
       eslint-config-airbnb-base: 15.0.0_srrmf5la5dmnsfe2mpg6sboreu
       eslint-config-prettier: 8.5.0_eslint@8.18.0
@@ -61,12 +65,15 @@ importers:
   example:
     specifiers:
       '@avsb/cli': ^0.1.5
+      '@babel/runtime': ^7.18.6
       '@emotion/react': ^11.9.3
       '@emotion/styled': ^11.9.3
       '@falcon/resource': workspace:^0.1.0
       '@falcon/viewport': workspace:^0.1.0
       '@types/react': ^18.0.14
       '@types/react-dom': ^18.0.5
+      core-js: ^3.23.3
+      cross-env: ^7.0.3
       glob: ^8.0.3
       react: ^18.2.0
       react-dom: ^18.2.0
@@ -77,10 +84,13 @@ importers:
       react-dom: 18.2.0_react@18.2.0
     devDependencies:
       '@avsb/cli': 0.1.5
+      '@babel/runtime': 7.18.6
       '@emotion/react': 11.9.3_luyos4mouogwq6z3wafb3re4ce
       '@emotion/styled': 11.9.3_mtgmvqaicd2yfw2b4v4o2ssbiu
       '@types/react': 18.0.14
       '@types/react-dom': 18.0.5
+      core-js: 3.23.3
+      cross-env: 7.0.3
       glob: 8.0.3
 
   packages/renderer:
