@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect } from 'react';
 import ResourceClient, { Tasks } from './resource';
 
 export interface CustomTasks extends Tasks {
-  cacheKey: string;
+  cachedKey: string;
 }
 interface ProviderProps {
   children: React.ReactNode;
@@ -25,8 +25,8 @@ const useResourceClient = () => useContext(ResourceContext);
 const useResourceRequest = (tasks: CustomTasks) => {
   const client = useContext(ResourceContext);
   useEffect(() => {
-    const { cacheKey, ...data } = tasks;
-    client.addTasks(cacheKey, data);
+    const { cachedKey, ...data } = tasks;
+    client.addTasks(cachedKey, data);
   }, [tasks]);
 };
 

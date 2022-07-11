@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-fallthrough */
 /* eslint-disable no-bitwise */
@@ -7,7 +8,7 @@ import decodeLittleEndian from '../decoders/decodeLittleEndian';
 import decodeBigEndian from '../decoders/decodeBigEndian';
 import decodeRLE from '../decoders/decodeRLE';
 // import decodeJPEGLS from '../decoders/decodeJPEGLS';
-import { ImageData, ExtendData } from './imageData';
+import { ImageData, ExtendData } from '../typing';
 import Tags from '../tagMap';
 
 const getDicomData = (arrayBuffer: ArrayBuffer): DataSet | void => {

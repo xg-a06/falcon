@@ -6,7 +6,7 @@ import data from './data.json';
 const urls = data.images.map(({ storagePath }) => `http://172.16.3.20:8000/${storagePath}`);
 
 const testTasks: CustomTasks = {
-  cacheKey: '123',
+  cachedKey: '1.2.392.200036.9116.2.6.1.44063.1796265542.1588733751.701487_axial',
   studyId: '1.2.392.200036.9116.2.6.1.44063.1796265542.1588733415.854445',
   seriesId: '1.2.392.200036.9116.2.6.1.44063.1796265542.1588733751.701487',
   urls,
@@ -14,6 +14,8 @@ const testTasks: CustomTasks = {
 
 const TestResource = () => {
   useResourceRequest(testTasks);
+  console.log('render');
+
   return <div>test resource</div>;
 };
 

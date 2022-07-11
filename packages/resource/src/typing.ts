@@ -45,3 +45,5 @@ export interface ImageData {
   elements?: any;
   byteArray?: any;
 }
+
+export type ExtendData = Pick<ImageData, 'imageId' | 'studyId' | 'seriesId'>;

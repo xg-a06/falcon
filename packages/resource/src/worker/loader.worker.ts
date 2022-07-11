@@ -1,27 +1,33 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ajax } from '@falcon/utils';
-import createImageData from './imageData';
+import { Tasks, PRIORITY_TYPES, RESOURCE_TYPES } from '../client/resource';
+import { parserDicom } from './parserFactory';
+import { ExtendData } from '../typing';
 
-interface queueItem {
-  seriesId: string;
-  studyId: string;
-  urls: Array<string>;
+interface ISource {
   type: string;
+  data: ArrayBuffer;
+  extendData: ExtendData;
+}
+interface QueueData {
+  cachedKey: string;
+  tasks: Required<Tasks>;
 }
 
-// 任务队列
-const queues: Record<string, Array<queueItem>> = {
-  '0': [],
-  '1': [],
-  '2': [],
+// 任务队列 先简单设计
+const queues: Record<string, Array<QueueData>> = {
+  [`${PRIORITY_TYPES.HIGH}`]: [],
+  [`${PRIORITY_TYPES.NORMAL}`]: [],
+  [`${PRIORITY_TYPES.LOW}`]: [],
 };
 
 // 线程上下文
-const ctx: Worker = self as any;
+const ctx = self as unknown as Worker;
 
 let isWorking = false;
 
 // 加载图片
-const loadImage = async (url: string): Promise<any> => {
+const loadImage = async (url: string): Promise<ArrayBuffer | undefined> => {
   const xhr = ajax.create({
     url,
     responseType: 'arraybuffer',
@@ -34,22 +40,22 @@ const loadImage = async (url: string): Promise<any> => {
 };
 
 // 重试逻辑
-const retryLoadImage = (url: string, retry = 2): Promise<any> => {
+const retryLoadImage = (url: string, retry = 2): Promise<ArrayBuffer | undefined> => {
   let time = retry;
   return loadImage(url)
     .then(image => image)
     .catch(error => {
       console.log(error);
-      return time > 0 ? retryLoadImage(url, --time) : false;
+      return time > 0 ? retryLoadImage(url, --time) : undefined;
     });
 };
 
 // 获取任务
-const pickTask = () => {
+const pickTask = (): QueueData | void => {
   const qItem = queues[0][0] || queues[1][0] || queues[2][0];
   if (qItem) {
-    const { seriesId, studyId, urls, type } = qItem;
-    return { seriesId, studyId, urls: urls.splice(0, 6), type };
+    const { cachedKey, tasks } = qItem;
+    return { cachedKey, tasks: { ...tasks, urls: tasks.urls.splice(0, 6) } };
   }
   return undefined;
 };
@@ -59,70 +65,76 @@ const clearInvalidQueue = () => {
   for (let priority = 0; priority < 3; priority += 1) {
     const queue = queues[priority];
     const qItem = queue[0];
-    if (qItem && qItem.urls.length === 0) {
+    if (qItem && qItem.tasks.urls.length === 0) {
       queue.shift();
     }
   }
 };
 
 // 添加任务到任务队列和任务map 以及调整优先级逻辑
-const addQueue = (data: any) => {
-  const { seriesId, urls, priority = 2 } = data;
-  queues[priority].push(data.tasks);
-  // 处理提升优先级情况 目前只处理单张提前这种场景
-  for (let p = 2; p > priority; p--) {
-    const queue = queues[p];
-    const itemIndex = queue.findIndex(item => item.seriesId === seriesId);
-    if (itemIndex !== -1) {
-      const qItem = queue[itemIndex];
-      qItem.urls = qItem.urls.filter(url => urls.indexOf(url) === -1);
-      if (qItem.urls.length === 0) {
-        queues[priority].shift();
-        queue.splice(itemIndex, 1);
-      }
-    }
-  }
+const addQueue = (data: QueueData) => {
+  const {
+    tasks: { priority },
+  } = data;
+  queues[priority].push(data);
+  // Todo：处理优先级队列重复任务情况？？
 };
 
 // 终止未加载task
-const abortQueue = ({ seriesId }: Record<string, string>) => {
-  console.log('abort');
+const abortQueue = ({ cachedKey }: Record<string, string>) => {
   for (let priority = 0; priority < 3; priority += 1) {
     const queue = queues[priority];
-    const itemIndex = queue.findIndex(item => item.seriesId === seriesId);
+    const itemIndex = queue.findIndex(item => item.cachedKey === cachedKey);
     if (itemIndex !== -1) {
       queue.splice(itemIndex, 1);
     }
   }
 };
 
+const createImageData = (source: ISource): any => {
+  const { type, data, extendData } = source;
+  let result;
+  switch (type) {
+    case RESOURCE_TYPES.DICOM:
+      result = parserDicom(data, extendData);
+      break;
+    case RESOURCE_TYPES.JPEG:
+    default:
+  }
+
+  return result;
+};
 // 加载数据逻辑
 const load = async () => {
   if (isWorking) {
     return;
   }
-  const tasks = pickTask();
-  if (!tasks) {
+  const taskData = pickTask();
+  if (!taskData) {
     return;
   }
   isWorking = true;
-  const { seriesId, studyId, urls, type } = tasks;
+  const {
+    cachedKey,
+    tasks: { studyId, seriesId, urls, type },
+  } = taskData;
   const works = urls.map(url => retryLoadImage(url));
-  const rets = await Promise.all(works);
+  const tmp = await Promise.all(works);
+  const rets = tmp.filter(i => i) as unknown as Array<ArrayBuffer>;
 
   if (rets.length > 0) {
-    const data = rets.map((ret: any, index: number) => {
-      const tmp = createImageData({ type, data: ret, extendData: { imageId: urls[index], studyId, seriesId } });
-      return { seriesId, studyId, ...tmp };
+    const data = rets.map((ret, index) => {
+      const imageData = createImageData({ type, data: ret, extendData: { imageId: urls[index], studyId, seriesId } });
+      return { studyId, seriesId, ...imageData };
     });
-    ctx.postMessage({ event: 'LOADED', data });
+    ctx.postMessage({ event: 'LOADED', data: { cachedKey, data } });
     clearInvalidQueue();
   }
   isWorking = false;
   load();
 };
 
-ctx.addEventListener('message', async e => {
+ctx.addEventListener('message', async (e: MessageEvent) => {
   const { event, data } = e.data;
   if (event === 'LOAD') {
     addQueue(data);
@@ -132,23 +144,3 @@ ctx.addEventListener('message', async e => {
   }
 });
 // DedicatedWorkerGlobalScope
-// 简单处理worker引入问题
-// class WebpackWorker extends Worker {
-//   constructor() {
-//     super('');
-//     console.log('init');
-//   }
-// }
-
-// export default WebpackWorker;
-// eslint-disable-next-line no-undef
-// const self = globalThis as unknown as DedicatedWorkerGlobalScope;
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-// self.onmessage = ({ data: { question } }) => {
-//   self.postMessage({
-//     answer: 42,
-//   });
-// };
-
-// export {};
