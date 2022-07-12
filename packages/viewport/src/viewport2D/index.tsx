@@ -1,6 +1,6 @@
 import React, { useRef, useState } from 'react';
 // import { useEventListener, useUniqueId, useDebounceEffect } from '../hooks';
-import { useEventListener, useDebounceEffect } from '../hooks';
+import { useEventListener, useDebounceEffect } from '@falcon/utils';
 import { Viewport2DContainer, IFrameResizer } from './style';
 
 const Viewport2D = () => {

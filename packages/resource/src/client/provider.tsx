@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import ResourceClient, { Tasks, RESOURCE_EVENTS } from './resource';
+import ResourceClient, { Tasks, RESOURCE_EVENTS } from './index';
 import { ImageData } from '../typing';
 
 interface CustomTasks extends Tasks {
@@ -37,11 +37,51 @@ const useResourceRequest = (tasks: CustomTasks) => {
   }, [tasks]);
 };
 
-const useResourceData = (query: QueryCache) => {
+const useResourceData = (query: QueryCache | undefined) => {
   const client = useContext(ResourceContext);
-  const [resource, setResource] = useState<ImageData | undefined>(undefined);
-  useEffect(() => {
+  const [resource, setResource] = useState<ImageData | ImageData[] | undefined>(() => {
+    // 初始化直接返回缓存
+    if (query === undefined) {
+      return undefined;
+    }
     const { cachedKey, index } = query;
+    let ret;
+    if (index !== undefined) {
+      ret = client.cacheManager[cachedKey]?.[index];
+      if (ret === undefined) {
+        // 提升优先级
+        client.TopTask(cachedKey, index);
+      }
+    } else {
+      ret = client.cacheManager[cachedKey] || [];
+    }
+    return ret;
+  });
+
+  useEffect(() => {
+    // 检查缓存，有缓存返回，没缓存提升优先级
+    if (query === undefined) {
+      setResource(undefined);
+      return () => undefined;
+    }
+
+    const { cachedKey, index } = query;
+
+    let ret: undefined | ImageData | ImageData[] = client.cacheManager[cachedKey];
+
+    if (index !== undefined) {
+      ret = client.cacheManager[cachedKey]?.[index];
+      if (ret !== undefined) {
+        setResource(ret);
+      } else {
+        // 提升优先级
+        client.TopTask(cachedKey, index);
+      }
+    } else if (ret) {
+      setResource(ret);
+    }
+
+    // 没缓存开始监听变化
     const cb = (eventData: any) => {
       if (cachedKey === eventData.cachedKey) {
         if (index !== undefined) {

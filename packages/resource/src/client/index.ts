@@ -91,37 +91,35 @@ class ResourceClient extends EventEmitter {
     return worker;
   }
 
+  TopTask(cachedKey: string, index: number): void {
+    const { tasksMap, downloadWorkder } = this;
+    if (tasksMap[cachedKey] === undefined) {
+      return;
+    }
+    const { studyId, seriesId, urls, type, priority } = tasksMap[cachedKey];
+    const tasks = { studyId, seriesId, urls: urls.slice(index, index + 1), type, priority };
+    downloadWorkder.postMessage({ event: 'TOP_TASK', data: { cachedKey, tasks } });
+  }
+
+  // 只允许全量替换任务，追加请使用appendTasks
   addTasks(cachedKey: string, tasks: Tasks): void {
-    const { tasksMap } = this;
+    const { tasksMap, cacheManager, downloadWorkder } = this;
     const { studyId, seriesId, urls, type = RESOURCE_TYPES.DICOM, priority = PRIORITY_TYPES.LOW } = tasks;
+    if (tasksMap[cachedKey]) {
+      downloadWorkder.postMessage({ event: 'ABORT', data: { cachedKey } });
+    }
+    let filterUrls = urls;
+    if (cacheManager[cachedKey]) {
+      filterUrls = urls.filter(url => cacheManager[cachedKey].findIndex(c => c.imageId === url) === -1);
+    }
     tasksMap[cachedKey] = {
       seriesId,
       studyId,
-      urls,
+      urls: filterUrls,
       type,
       priority,
     };
-    this.loadData(cachedKey);
-  }
-
-  loadData(cachedKey: string) {
-    const { tasksMap, downloadWorkder } = this;
-    const tasks = tasksMap[cachedKey];
-
-    downloadWorkder.postMessage({ event: 'LOAD', data: { cachedKey, tasks } });
-  }
-
-  async getResourceData(cachedKey: string, cond?: number) {
-    const { cacheManager } = this;
-
-    if (cond !== undefined && !cacheManager[cachedKey]?.[cond]) {
-      // await this.loadIndex(cachedKey, cond);
-      return cacheManager[cachedKey][cond];
-    }
-    if (!cacheManager[cachedKey]) {
-      await this.loadData(cachedKey);
-    }
-    return cacheManager[cachedKey];
+    downloadWorkder.postMessage({ event: 'LOAD', data: { cachedKey, tasks: tasksMap[cachedKey] } });
   }
 }
 

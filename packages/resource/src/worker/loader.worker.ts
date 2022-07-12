@@ -1,6 +1,5 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ajax } from '@falcon/utils';
-import { Tasks, PRIORITY_TYPES, RESOURCE_TYPES } from '../client/resource';
+import { Tasks, PRIORITY_TYPES, RESOURCE_TYPES } from '../client';
 import { parserDicom } from './parserFactory';
 import { ExtendData } from '../typing';
 
@@ -80,14 +79,26 @@ const addQueue = (data: QueueData) => {
   // Todo：处理优先级队列重复任务情况？？
 };
 
+const topQueue = (data: QueueData) => {
+  const {
+    cachedKey,
+    tasks: { urls, priority },
+  } = data;
+
+  const queue = queues[priority];
+  queue.forEach(item => {
+    if (item.cachedKey === cachedKey) {
+      item.tasks.urls = item.tasks.urls.filter(url => urls.indexOf(url) === -1);
+    }
+  });
+  queue.unshift(data);
+};
+
 // 终止未加载task
 const abortQueue = ({ cachedKey }: Record<string, string>) => {
   for (let priority = 0; priority < 3; priority += 1) {
     const queue = queues[priority];
-    const itemIndex = queue.findIndex(item => item.cachedKey === cachedKey);
-    if (itemIndex !== -1) {
-      queue.splice(itemIndex, 1);
-    }
+    queues[priority] = queue.filter(item => item.cachedKey !== cachedKey);
   }
 };
 
@@ -136,11 +147,19 @@ const load = async () => {
 
 ctx.addEventListener('message', async (e: MessageEvent) => {
   const { event, data } = e.data;
-  if (event === 'LOAD') {
-    addQueue(data);
-    load();
-  } else if (event === 'ABORT') {
-    abortQueue(data);
+  switch (event) {
+    case 'LOAD':
+      addQueue(data);
+      load();
+      break;
+    case 'TOP_TASK':
+      topQueue(data);
+      break;
+    case 'ABORT':
+      abortQueue(data);
+      break;
+    default:
+      break;
   }
 });
 // DedicatedWorkerGlobalScope

@@ -26,7 +26,6 @@
     "clean": "rimraf ./node_modules"
   },
   "dependencies": {
-    "@types/uuid": "^8.3.4",
-    "uuid": "^8.3.2"
+    "@falcon/utils": "workspace:^0.1.0"
   }
 }

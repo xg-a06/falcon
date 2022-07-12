@@ -110,15 +110,19 @@ importers:
     specifiers: {}
 
   packages/utils:
-    specifiers: {}
-
-  packages/viewport:
     specifiers:
       '@types/uuid': ^8.3.4
       uuid: ^8.3.2
     dependencies:
-      '@types/uuid': 8.3.4
       uuid: 8.3.2
+    devDependencies:
+      '@types/uuid': 8.3.4
+
+  packages/viewport:
+    specifiers:
+      '@falcon/utils': workspace:^0.1.0
+    dependencies:
+      '@falcon/utils': link:../utils
 
 packages:
 
@@ -2920,7 +2924,7 @@ packages:
 
   /@types/uuid/8.3.4:
     resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
-    dev: false
+    dev: true
 
   /@types/webpack-bundle-analyzer/4.4.1:
     resolution: {integrity: sha512-yQAj3l7bIYL+QRRlNJt6gyP+zrXZOlgaR4wsX0WY4yzZIbv41ZibREfZvuYjxY0iVtvQQlbhx0AeokkCuqUAQg==}

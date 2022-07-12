@@ -12,7 +12,7 @@ const useEvent = (fn: EventListener) => {
     fnRef.current = fn;
   }, [fn]);
 
-  const cb = useCallback((e: Event) => {
+  const cb = useCallback((e: any) => {
     const handler = fnRef.current;
     return handler && handler(e);
   }, []);
