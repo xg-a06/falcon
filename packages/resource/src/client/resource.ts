@@ -1,5 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-interface */
+import { EventEmitter } from '@falcon/utils';
+import { ImageData } from '../typing';
+
 interface ResourceClientOptions {}
 
 export interface Tasks {
@@ -36,7 +39,11 @@ export const PRIORITY_TYPES = {
   LOW: 2,
 };
 
-class ResourceClient {
+export const RESOURCE_EVENTS = {
+  LOADED: 'RESOURCE_LOADED',
+};
+
+class ResourceClient extends EventEmitter {
   options: ResourceClientOptions = {};
 
   downloadWorkder: Worker;
@@ -48,26 +55,36 @@ class ResourceClient {
   callbackProcess: Record<string, Promise<any>> = {};
 
   constructor(options: ResourceClientOptions = {}) {
+    super();
     this.options = { ...this.options, ...options };
 
     this.downloadWorkder = this.initDownloadWorker();
   }
 
   initDownloadWorker(): Worker {
-    const { callbackProcess } = this;
     const worker = new Worker(new URL('../worker/loader.worker', import.meta.url));
     worker.addEventListener('message', e => {
       const {
         event,
-        data: { cachedKey, data },
+        data: { cachedKey, data: cachedData },
       } = e.data;
       if (event === 'LOADED') {
         const { tasksMap, cacheManager } = this;
         if (!cacheManager[cachedKey]) {
           cacheManager[cachedKey] = [];
         }
-        const index = tasksMap[cachedKey].urls.findIndex(url => url === data.imageId);
-        cacheManager[cachedKey][index] = data;
+        cachedData.forEach((data: ImageData) => {
+          const index = tasksMap[cachedKey].urls.findIndex(url => url === data.imageId);
+          cacheManager[cachedKey][index] = data;
+          this.emit({
+            eventName: RESOURCE_EVENTS.LOADED,
+            eventData: {
+              cachedKey,
+              index,
+              data,
+            },
+          });
+        });
       }
     });
 
@@ -93,8 +110,6 @@ class ResourceClient {
 
     downloadWorkder.postMessage({ event: 'LOAD', data: { cachedKey, tasks } });
   }
-
-  // loadIndex(cachedKey: string, cond: number) {}
 
   async getResourceData(cachedKey: string, cond?: number) {
     const { cacheManager } = this;

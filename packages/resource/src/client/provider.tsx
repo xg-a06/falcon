@@ -1,9 +1,16 @@
-import React, { createContext, useContext, useEffect } from 'react';
-import ResourceClient, { Tasks } from './resource';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import ResourceClient, { Tasks, RESOURCE_EVENTS } from './resource';
+import { ImageData } from '../typing';
 
-export interface CustomTasks extends Tasks {
+interface CustomTasks extends Tasks {
   cachedKey: string;
 }
+
+interface QueryCache {
+  cachedKey: string;
+  index?: number;
+}
+
 interface ProviderProps {
   children: React.ReactNode;
   client?: ResourceClient;
@@ -30,7 +37,30 @@ const useResourceRequest = (tasks: CustomTasks) => {
   }, [tasks]);
 };
 
-// const useResourceData = (query: QueryCache) => useContext(ResourceContext);
+const useResourceData = (query: QueryCache) => {
+  const client = useContext(ResourceContext);
+  const [resource, setResource] = useState<ImageData | undefined>(undefined);
+  useEffect(() => {
+    const { cachedKey, index } = query;
+    const cb = (eventData: any) => {
+      if (cachedKey === eventData.cachedKey) {
+        if (index !== undefined) {
+          if (index === eventData.index) {
+            setResource(eventData.data);
+          }
+        } else {
+          setResource(eventData.data);
+        }
+      }
+    };
+    client.on(RESOURCE_EVENTS.LOADED, cb);
+    return () => {
+      client.off(RESOURCE_EVENTS.LOADED, cb);
+    };
+  }, [query]);
 
-export { useResourceClient, useResourceRequest };
+  return resource;
+};
+
+export { useResourceClient, useResourceRequest, useResourceData, CustomTasks, QueryCache };
 export default ResourceProvider;

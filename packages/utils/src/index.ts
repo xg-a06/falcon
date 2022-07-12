@@ -1,3 +1,2 @@
-import ajax from './ajax';
-
-export { ajax };
+export { default as ajax } from './ajax';
+export { default as EventEmitter } from './eventEmitter';
