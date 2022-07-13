@@ -1,39 +1,4 @@
-/* eslint-disable no-underscore-dangle */
-/* eslint-disable no-param-reassign */
 import { DataSet } from 'dicom-parser';
-
-function debounce(fun: any, delay: number, ctx?: any) {
-  return (...args: Array<any>): void => {
-    const context = ctx || {};
-    clearTimeout(fun.id);
-    fun.id = setTimeout(() => {
-      fun.apply(context, args);
-    }, delay);
-  };
-}
-
-function throttle(fun: any, delay: number, ctx?: any): any {
-  let last = 0;
-  return (...args: Array<any>) => {
-    const _this = ctx || {};
-    const now = new Date() as unknown as number;
-    if (now - last > delay) {
-      fun.apply(_this, args);
-      last = now;
-    }
-  };
-}
-
-function doSetInterval(fn: (...args: Array<any>) => any, timespan: number) {
-  if (fn()) {
-    const timerId = setInterval(() => {
-      const ret = fn();
-      if (!ret) {
-        clearInterval(timerId);
-      }
-    }, timespan);
-  }
-}
 
 function getNumberValues(dataSet: DataSet, tag: string, minimumLength = 0): any {
   const values: Array<any> = [];
@@ -123,4 +88,4 @@ const getComporessionState = ({ lossyImageCompression, lossyImageCompressionRati
   return 'Lossless / Uncompressed';
 };
 
-export { debounce, throttle, doSetInterval, getNumberValues, getNumberValue, stringGBK, stringUTF8, getComporessionState };
+export { getNumberValues, getNumberValue, stringGBK, stringUTF8, getComporessionState };

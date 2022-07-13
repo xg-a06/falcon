@@ -1,7 +1,7 @@
 import { ajax } from '@falcon/utils';
-import { Tasks, PRIORITY_TYPES, RESOURCE_TYPES } from '../client';
+import { PRIORITY_TYPES, RESOURCE_TYPES } from '../client/const';
 import { parserDicom } from './parserFactory';
-import { ExtendData } from '../typing';
+import { Tasks, ExtendData } from '../typing';
 
 interface ISource {
   type: string;
@@ -89,9 +89,9 @@ const topQueue = (data: QueueData) => {
   queue.forEach(item => {
     if (item.cachedKey === cachedKey) {
       item.tasks.urls = item.tasks.urls.filter(url => urls.indexOf(url) === -1);
+      Array.prototype.unshift.apply(item.tasks.urls, urls);
     }
   });
-  queue.unshift(data);
 };
 
 // 终止未加载task

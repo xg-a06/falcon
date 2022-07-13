@@ -55,4 +55,4 @@ class Transform {
   }
 }
 
-export default Transform;
+export { Transform };

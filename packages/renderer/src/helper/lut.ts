@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { ImageData as RenderData } from '../worker/imageData';
+import { ImageData } from '@falcon/resource';
 
 export interface WWWC {
   ww: number;
@@ -16,7 +16,7 @@ const generateLinearModalityLUT =
   storedPixelValue =>
     storedPixelValue * slope + intercept;
 
-const getVoiLUTData = (image: RenderData, wwwc?: WWWC): Uint8ClampedArray => {
+const getVoiLUTData = (image: ImageData, wwwc?: WWWC): Uint8ClampedArray => {
   let { minPixelValue, maxPixelValue, windowCenter, windowWidth, slope, intercept } = image;
   if (wwwc !== undefined) {
     windowCenter = wwwc.wc;
@@ -32,7 +32,7 @@ const getVoiLUTData = (image: RenderData, wwwc?: WWWC): Uint8ClampedArray => {
   if (image.color) {
     calcFn = v => vlutfn(v);
   }
-  for (let i = 0; i < length; i += 1) {
+  for (let i = 0; i < length; i++) {
     voiLUT[i] = calcFn(minPixelValue + i);
   }
 

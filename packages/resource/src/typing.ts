@@ -47,3 +47,11 @@ export interface ImageData {
 }
 
 export type ExtendData = Pick<ImageData, 'imageId' | 'studyId' | 'seriesId'>;
+
+export interface Tasks {
+  studyId: string;
+  seriesId: string;
+  urls: Array<string>;
+  type?: string;
+  priority?: number;
+}

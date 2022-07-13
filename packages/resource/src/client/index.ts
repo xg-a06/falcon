@@ -1,17 +1,9 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-empty-interface */
 import { EventEmitter } from '@falcon/utils';
-import { ImageData } from '../typing';
+import { RESOURCE_TYPES, RESOURCE_EVENTS, PRIORITY_TYPES } from './const';
+import { Tasks, ImageData } from '../typing';
 
 interface ResourceClientOptions {}
-
-export interface Tasks {
-  studyId: string;
-  seriesId: string;
-  urls: Array<string>;
-  type?: string;
-  priority?: number;
-}
 
 interface TasksMap {
   [key: string]: {
@@ -26,22 +18,6 @@ interface TasksMap {
 interface CacheManager {
   [key: string]: Array<ImageData>;
 }
-
-export const RESOURCE_TYPES = {
-  DICOM: 'dicom',
-  JPEG: 'jpeg',
-  VTP: 'vtp',
-};
-
-export const PRIORITY_TYPES = {
-  HIGH: 0,
-  NORMAL: 1,
-  LOW: 2,
-};
-
-export const RESOURCE_EVENTS = {
-  LOADED: 'RESOURCE_LOADED',
-};
 
 class ResourceClient extends EventEmitter {
   options: ResourceClientOptions = {};

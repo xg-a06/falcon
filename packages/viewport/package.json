@@ -26,6 +26,8 @@
     "clean": "rimraf ./node_modules"
   },
   "dependencies": {
+    "@falcon/renderer": "workspace:^0.1.0",
+    "@falcon/resource": "workspace:^0.1.0",
     "@falcon/utils": "workspace:^0.1.0"
   }
 }

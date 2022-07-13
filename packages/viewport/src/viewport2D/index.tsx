@@ -1,9 +1,16 @@
-import React, { useRef, useState } from 'react';
-// import { useEventListener, useUniqueId, useDebounceEffect } from '../hooks';
+import React, { useRef, useState, FC, useEffect } from 'react';
 import { useEventListener, useDebounceEffect } from '@falcon/utils';
+import { ImageData } from '@falcon/resource';
+import { RenderFunction } from '@falcon/renderer';
 import { Viewport2DContainer, IFrameResizer } from './style';
 
-const Viewport2D = () => {
+interface Props {
+  renderData: ImageData | undefined;
+  renderFn: RenderFunction;
+}
+
+const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
+  const [displayState] = useState({ wwwc: { ww: 800, wc: 300 } });
   const [size, setSize] = useState([0, 0]);
 
   // const id = useUniqueId();
@@ -37,6 +44,10 @@ const Viewport2D = () => {
       setSize([offsetWidth, offsetHeight]);
     },
   );
+
+  useEffect(() => {
+    renderFn(renderData, { elm: canvasRef.current!, displayState });
+  }, [renderData, renderFn, displayState]);
 
   return (
     <Viewport2DContainer>
