@@ -1,0 +1,29 @@
+{
+  "name": "@falcon/host",
+  "version": "0.1.0",
+  "description": "host module",
+  "main": "dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@code.infervision.com:2022/nirvana/falcon.git"
+  },
+  "keywords": [],
+  "author": "xg-a06 <xg_jser@163.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://code.infervision.com/nirvana/falcon/issues"
+  },
+  "homepage": "https://code.infervision.com/nirvana/falcon#readme",
+  "scripts": {
+    "start": "tsc -w",
+    "build": "rimraf ./dist && tsc --module commonjs --outDir dist",
+    "clean": "rimraf ./node_modules"
+  },
+  "dependencies": {}
+}

@@ -35,15 +35,9 @@ const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
     },
   );
 
-  useEventListener(
-    () => frameResizerRef.current!.contentWindow!.document,
-    'readystatechange',
-    e => {
-      const { documentElement } = e.currentTarget as Document;
-      const { offsetWidth, offsetHeight } = documentElement;
-      setSize([offsetWidth, offsetHeight]);
-    },
-  );
+  useEffect(() => {
+    frameResizerRef.current!.contentWindow!.dispatchEvent(new Event('resize'));
+  }, []);
 
   useEffect(() => {
     renderFn(renderData, { elm: canvasRef.current!, displayState });
@@ -52,7 +46,7 @@ const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
   return (
     <Viewport2DContainer>
       <canvas ref={canvasRef} />
-      <IFrameResizer ref={frameResizerRef} />
+      <IFrameResizer ref={frameResizerRef} src="about:blank" />
     </Viewport2DContainer>
   );
 };

@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, RefObject } from 'react';
-import useEvent, { EventListener } from './useEvent';
+import { useEvent, EventListener } from './useEvent';
 
 type DomEventTarget = HTMLElement | Window | Document;
 type GetTarget = () => DomEventTarget;
@@ -8,7 +9,7 @@ const empty = () => undefined;
 
 // 目前只支持ref绑定，后续可以追加dom支持
 const useEventListener = (target: RefObject<HTMLElement> | GetTarget, eventName: string, fn: EventListener, deps: Array<any> = []) => {
-  const cb = useEvent(fn);
+  const cbEvent = useEvent(fn);
 
   useEffect(() => {
     let tmp: DomEventTarget | null = null;
@@ -20,10 +21,10 @@ const useEventListener = (target: RefObject<HTMLElement> | GetTarget, eventName:
     if (tmp === null) {
       return empty;
     }
-    tmp.addEventListener(eventName, cb);
+    tmp.addEventListener(eventName, cbEvent);
 
-    return () => tmp?.removeEventListener(eventName, cb);
+    return () => tmp?.removeEventListener(eventName, cbEvent);
   }, [deps]);
 };
 
-export default useEventListener;
+export { useEventListener };

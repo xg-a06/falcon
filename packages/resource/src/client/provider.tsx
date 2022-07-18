@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useEffect, useMemo, useReducer } from 'react';
-import { useEvent } from '@falcon/utils';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
+import { useForceRender, useEvent } from '@falcon/utils';
 import ResourceClient from './index';
 import { RESOURCE_EVENTS } from './const';
 import { Tasks } from '../typing';
@@ -41,7 +41,7 @@ const useResourceRequest = (tasks: CustomTasks) => {
 
 const useResourceData = (query: QueryCache | undefined) => {
   const client = useContext(ResourceContext);
-  const [force, forceUpdate] = useReducer(x => x + 1, 0);
+  const [forceState, forceRender] = useForceRender();
   const resource = useMemo(() => {
     if (query === undefined) {
       return undefined;
@@ -58,7 +58,7 @@ const useResourceData = (query: QueryCache | undefined) => {
       ret = client.cacheManager[cachedKey] || [];
     }
     return ret;
-  }, [query, force]);
+  }, [query, forceState]);
 
   const cb = useEvent((eventData: any) => {
     if (query === undefined) {
@@ -68,10 +68,10 @@ const useResourceData = (query: QueryCache | undefined) => {
     if (cachedKey === eventData.cachedKey) {
       if (index !== undefined) {
         if (index === eventData.index) {
-          forceUpdate();
+          forceRender();
         }
       } else {
-        forceUpdate();
+        forceRender();
       }
     }
   });

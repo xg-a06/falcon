@@ -9,7 +9,6 @@ import './index.global.css';
 import data from './data.json';
 
 const urls = data.series.images.map(({ storagePath }) => `http://172.16.6.6:8000/${storagePath}`);
-console.log(data.series.images.length);
 
 const testTasks: CustomTasks = {
   cachedKey: '1.2.392.200036.9116.2.6.1.44063.1796265542.1588733751.701487_axial',
@@ -18,22 +17,22 @@ const testTasks: CustomTasks = {
   urls,
 };
 
-let index = 0;
+const index = 0;
 
 const App = () => {
   useResourceRequest(testTasks);
   const [showData, setShowData] = useState<QueryCache>({ cachedKey: '1.2.392.200036.9116.2.6.1.44063.1796265542.1588733751.701487_axial', index: 0 });
   const resource = useResourceData(showData) as ImageData;
-  useEffect(() => {
-    setInterval(() => {
-      let i = ++index;
-      if (i >= 264) {
-        i = 0;
-        index = 0;
-      }
-      setShowData({ cachedKey: '1.2.392.200036.9116.2.6.1.44063.1796265542.1588733751.701487_axial', index: i });
-    }, 16);
-  }, []);
+  // useEffect(() => {
+  //   setInterval(() => {
+  //     let i = ++index;
+  //     if (i >= 264) {
+  //       i = 0;
+  //       index = 0;
+  //     }
+  //     setShowData({ cachedKey: '1.2.392.200036.9116.2.6.1.44063.1796265542.1588733751.701487_axial', index: i });
+  //   }, 16);
+  // }, []);
   return (
     <div className="container">
       <ResourceProvider>

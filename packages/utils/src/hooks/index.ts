@@ -1,5 +1,6 @@
-export { default as useEvent } from './useEvent';
-export { default as useEventListener } from './useEventListener';
-export { default as useUniqueId } from './useUniqueId';
-export { useDebounce, useDebounceEffect } from './useDebounce';
-export { useUpdateEffect } from './useUpdateEffect';
+export * from './useEvent';
+export * from './useEventListener';
+export * from './useUniqueId';
+export * from './useDebounce';
+export * from './useUpdateEffect';
+export * from './useForceRender';

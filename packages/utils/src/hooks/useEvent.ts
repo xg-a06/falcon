@@ -20,4 +20,4 @@ const useEvent = (fn: EventListener) => {
   return cb;
 };
 
-export default useEvent;
+export { useEvent };
