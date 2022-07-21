@@ -1,7 +1,8 @@
 import { ImageData as RenderData } from '@falcon/resource';
+import { getElmSize } from '@falcon/utils';
 import { getVoiLUTData, Transform, WWWC } from './helper';
 
-interface DisplayState {
+export interface DisplayState {
   hflip: boolean;
   vflip: boolean;
   scale: number;
@@ -11,17 +12,9 @@ interface DisplayState {
   wwwc: { ww: number; wc: number };
 }
 
-interface HTMLCanvasElementEx extends HTMLCanvasElement {
-  displayState: DisplayState;
-  initDisplayState: Partial<DisplayState>;
-  displayStateChanged: boolean;
-  image: RenderData;
-  transform: Transform;
-}
-
 interface RenderOptions {
   elm: HTMLCanvasElement;
-  displayState?: Partial<DisplayState>;
+  displayState: DisplayState;
 }
 
 type RenderFunction = (renderData: RenderData | undefined, options: RenderOptions) => boolean;
@@ -32,20 +25,6 @@ interface TransformOptions extends Pick<DisplayState, 'offset' | 'angle' | 'scal
   renderCanvasWidth: number;
   renderCanvasHeight: number;
 }
-
-const getElmSize = (elm: HTMLElement): { width: number; height: number } => {
-  const { clientWidth, clientHeight } = elm;
-  return { width: clientWidth, height: clientHeight };
-};
-
-const generateDisplayState = (renderData: RenderData, elm: HTMLCanvasElement, initDisplayState: Partial<DisplayState>) => {
-  const { width, height } = getElmSize(elm);
-  const { columns, rows } = renderData;
-  const scale = Math.min(width / columns, height / rows);
-  let ret: DisplayState = { hflip: false, vflip: false, angle: 0, invert: false, offset: { x: 0, y: 0 }, scale, wwwc: { ww: renderData.windowWidth, wc: renderData.windowCenter } };
-  ret = { ...ret, ...initDisplayState };
-  return ret;
-};
 
 const generateImageData = (renderData: RenderData, wwwc: WWWC): ImageData => {
   const { columns, rows, pixelData, minPixelValue } = renderData;
@@ -92,21 +71,14 @@ const basicRender: RenderFunction = (renderData, options): boolean => {
   if (renderData === undefined) {
     return false;
   }
-  const { elm, displayState = {} } = options;
+  const { elm, displayState } = options;
 
   const { width, height } = getElmSize(elm);
   if (width === 0 || height === 0) {
     return false;
   }
-  const elmEx = elm as HTMLCanvasElementEx;
 
-  if (!elmEx.displayState) {
-    elmEx.initDisplayState = displayState;
-    const defaultDisplayState = generateDisplayState(renderData, elm, displayState);
-    elmEx.displayState = { ...defaultDisplayState, ...displayState };
-  }
-
-  const { offset, angle, scale, hflip, vflip, wwwc } = elmEx.displayState;
+  const { offset, angle, scale, hflip, vflip, wwwc } = displayState;
   const imageData = generateImageData(renderData, wwwc);
   const { columns, rows } = renderData;
   const renderCanvas = generateRenderCanvas(columns, rows, imageData);

@@ -1,7 +1,9 @@
-import React, { useRef, useState, FC, useEffect } from 'react';
-import { useEventListener, useDebounceEffect } from '@falcon/utils';
+import { useRef, useState, FC, useEffect } from 'react';
+import { useEventListener, useDebounceEffect, useUniqueId, getElmSize } from '@falcon/utils';
+import { viewportsModel, useModel, useViewport } from '@falcon/host';
 import { ImageData } from '@falcon/resource';
-import { RenderFunction } from '@falcon/renderer';
+import { RenderFunction, DisplayState } from '@falcon/renderer';
+import { useWWWCTool } from '@falcon/tool';
 import { Viewport2DContainer, IFrameResizer } from './style';
 
 interface Props {
@@ -9,13 +11,36 @@ interface Props {
   renderFn: RenderFunction;
 }
 
+const generateDisplayState = (renderData: ImageData, elm: HTMLCanvasElement, initDisplayState: Partial<DisplayState>) => {
+  const { width, height } = getElmSize(elm);
+  const { columns, rows } = renderData;
+  const scale = Math.min(width / columns, height / rows);
+  let ret: DisplayState = { hflip: false, vflip: false, angle: 0, invert: false, offset: { x: 0, y: 0 }, scale, wwwc: { ww: renderData.windowWidth, wc: renderData.windowCenter } };
+  ret = { ...ret, ...initDisplayState };
+  return ret;
+};
+
 const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
-  const [displayState] = useState({ wwwc: { ww: 800, wc: 300 } });
   const [size, setSize] = useState([0, 0]);
 
-  // const id = useUniqueId();
   const frameResizerRef = useRef<HTMLIFrameElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const isInit = useRef<boolean>(false);
+
+  const id = useUniqueId();
+  const { addViewport } = useModel(viewportsModel);
+  const { displayState } = useViewport(id);
+
+  useEffect(() => {
+    if (renderData && !isInit.current) {
+      const initDisplayState = generateDisplayState(renderData, canvasRef.current!, {});
+      addViewport({
+        id,
+        displayState: initDisplayState,
+      });
+      isInit.current = true;
+    }
+  }, [renderData]);
 
   useDebounceEffect(() => {
     const [width, height] = size;
@@ -39,7 +64,12 @@ const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
     frameResizerRef.current!.contentWindow!.dispatchEvent(new Event('resize'));
   }, []);
 
+  useWWWCTool(id, canvasRef);
+
   useEffect(() => {
+    if (!displayState) {
+      return;
+    }
     renderFn(renderData, { elm: canvasRef.current!, displayState });
   }, [renderData, renderFn, displayState]);
 

@@ -6,7 +6,8 @@
       "ESNext"
     ],
     "types": [
-      "../../typings/"
+      "../../typings/",
+      "node"
     ],
     "declaration": true,
     "declarationMap": true,

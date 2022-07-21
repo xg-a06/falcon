@@ -1,7 +1,7 @@
 import { useRef, useCallback, useLayoutEffect } from 'react';
 
 export interface EventListener {
-  (evt: Event): void;
+  (e: Event | MouseEvent): void;
 }
 
 // 据说在react18的并发模式下有问题，但是大多数场景应该没问题。

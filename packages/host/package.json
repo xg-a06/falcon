@@ -25,5 +25,8 @@
     "build": "rimraf ./dist && tsc --module commonjs --outDir dist",
     "clean": "rimraf ./node_modules"
   },
-  "dependencies": {}
+  "peerDependencies": {
+    "immer": "^9.0.15",
+    "zustand": "4.0.0-rc.2"
+  }
 }

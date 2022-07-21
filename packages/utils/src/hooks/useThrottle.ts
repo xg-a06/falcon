@@ -10,8 +10,8 @@ const useThrottle = (cb: Callback, delay: number) => {
   }, [cb]);
 
   const debFn = useCallback((...args: Array<any>) => {
-    if (current.timer !== undefined) {
-      current.fn.call(this, ...args);
+    if (current.timer === undefined) {
+      current.fn.apply(this, args);
       current.timer = setTimeout(() => {
         current.timer = undefined;
       }, delay);

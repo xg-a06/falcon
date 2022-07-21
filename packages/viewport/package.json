@@ -26,8 +26,14 @@
     "clean": "rimraf ./node_modules"
   },
   "dependencies": {
+    "@falcon/host": "workspace:^0.1.0",
     "@falcon/renderer": "workspace:^0.1.0",
     "@falcon/resource": "workspace:^0.1.0",
+    "@falcon/tool": "workspace:^0.1.0",
     "@falcon/utils": "workspace:^0.1.0"
+  },
+  "peerDependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   }
 }

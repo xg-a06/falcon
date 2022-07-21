@@ -29,6 +29,7 @@ const config = {
         changeOrigin: true,
       },
     },
+    hot: false,
   },
   path: {
     tplPath: htmlPlugins,

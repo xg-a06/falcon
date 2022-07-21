@@ -26,12 +26,14 @@ importers:
       eslint-plugin-react: ^7.30.1
       eslint-plugin-react-hooks: ^4.6.0
       husky: ^8.0.1
+      immer: ^9.0.15
       lint-staged: ^13.0.3
       prettier: ^2.7.1
       react: ^18.2.0
       react-dom: ^18.2.0
       rimraf: ^3.0.2
       typescript: ^4.7.4
+      zustand: 4.0.0-rc.2
     devDependencies:
       '@babel/runtime': 7.18.6
       '@changesets/cli': 2.23.0
@@ -55,12 +57,14 @@ importers:
       eslint-plugin-react: 7.30.1_eslint@8.18.0
       eslint-plugin-react-hooks: 4.6.0_eslint@8.18.0
       husky: 8.0.1
+      immer: 9.0.15
       lint-staged: 13.0.3
       prettier: 2.7.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
       rimraf: 3.0.2
       typescript: 4.7.4
+      zustand: 4.0.0-rc.2_immer@9.0.15+react@18.2.0
 
   example:
     specifiers:
@@ -98,9 +102,11 @@ importers:
   packages/renderer:
     specifiers:
       '@falcon/resource': workspace:^0.1.0
+      '@falcon/utils': workspace:^0.1.0
       gl-matrix: ^3.4.3
     dependencies:
       '@falcon/resource': link:../resource
+      '@falcon/utils': link:../utils
     devDependencies:
       gl-matrix: 3.4.3
 
@@ -115,7 +121,12 @@ importers:
       gl-matrix: 3.4.3
 
   packages/tool:
-    specifiers: {}
+    specifiers:
+      '@falcon/host': workspace:^0.1.0
+      '@falcon/utils': workspace:^0.1.0
+    dependencies:
+      '@falcon/host': link:../host
+      '@falcon/utils': link:../utils
 
   packages/utils:
     specifiers:
@@ -128,12 +139,16 @@ importers:
 
   packages/viewport:
     specifiers:
+      '@falcon/host': workspace:^0.1.0
       '@falcon/renderer': workspace:^0.1.0
       '@falcon/resource': workspace:^0.1.0
+      '@falcon/tool': workspace:^0.1.0
       '@falcon/utils': workspace:^0.1.0
     dependencies:
+      '@falcon/host': link:../host
       '@falcon/renderer': link:../renderer
       '@falcon/resource': link:../resource
+      '@falcon/tool': link:../tool
       '@falcon/utils': link:../utils
 
 packages:
@@ -5901,6 +5916,10 @@ packages:
     dev: true
     optional: true
 
+  /immer/9.0.15:
+    resolution: {integrity: sha512-2eB/sswms9AEUSkOm4SbV5Y7Vmt/bKRwByd52jfLkW4OLYeaTP3EEiJ9agqU0O/tq6Dk62Zfj+TJSqfm1rLVGQ==}
+    dev: true
+
   /immutable/4.1.0:
     resolution: {integrity: sha512-oNkuqVTA8jqG1Q6c+UglTOD1xhC1BtjKI7XkCXRkZHrN5m18/XsnUp8Q89GkQO/z+0WjonSvl0FLhDYftp46nQ==}
     dev: true
@@ -9151,6 +9170,14 @@ packages:
     deprecated: Please see https://github.com/lydell/urix#deprecated
     dev: true
 
+  /use-sync-external-store/1.2.0_react@18.2.0:
+    resolution: {integrity: sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 18.2.0
+    dev: true
+
   /utf-8-validate/5.0.9:
     resolution: {integrity: sha512-Yek7dAy0v3Kl0orwMlvi7TPtiCNrdfHNd7Gcc/pLq4BLXqfAmd0J7OWMizUQnTTJsyjKn02mU7anqwfmUP4J8Q==}
     engines: {node: '>=6.14.2'}
@@ -9605,4 +9632,21 @@ packages:
   /yocto-queue/0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
+    dev: true
+
+  /zustand/4.0.0-rc.2_immer@9.0.15+react@18.2.0:
+    resolution: {integrity: sha512-eGDJHNmubDTggkMyZciCfI0H+NptOKQICpliJ4hd/XAjEvYp5h525CVJZ8uDfwd9P5JfSFjpBo14Z0qv04NWJA==}
+    engines: {node: '>=12.7.0'}
+    peerDependencies:
+      immer: '>=9.0'
+      react: '>=16.8'
+    peerDependenciesMeta:
+      immer:
+        optional: true
+      react:
+        optional: true
+    dependencies:
+      immer: 9.0.15
+      react: 18.2.0
+      use-sync-external-store: 1.2.0_react@18.2.0
     dev: true

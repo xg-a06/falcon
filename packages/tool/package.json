@@ -25,5 +25,8 @@
     "build": "rimraf ./dist && tsc --module commonjs --outDir dist",
     "clean": "rimraf ./node_modules"
   },
-  "dependencies": {}
+  "dependencies": {
+    "@falcon/host": "workspace:^0.1.0",
+    "@falcon/utils": "workspace:^0.1.0"
+  }
 }

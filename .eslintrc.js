@@ -33,6 +33,8 @@ module.exports = {
         tsx: 'never',
       },
     ],
+    'react/jsx-uses-react': 'off',
+    'react/react-in-jsx-scope': 'off',
     'import/prefer-default-export': 0,
     'import/no-extraneous-dependencies': 0,
     'no-unused-vars': 0,
