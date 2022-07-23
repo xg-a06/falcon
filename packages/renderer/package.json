@@ -25,11 +25,9 @@
     "build": "rimraf ./dist && tsc --module commonjs --outDir dist",
     "clean": "rimraf ./node_modules"
   },
-  "devDependencies": {
-    "gl-matrix": "^3.4.3"
-  },
   "dependencies": {
     "@falcon/resource": "workspace:^0.1.0",
+    "@falcon/utils": "workspace:^0.1.0",
     "@falcon/utils": "workspace:^0.1.0"
   }
 }

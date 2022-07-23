@@ -1,26 +1,30 @@
 import { useRef, RefObject } from 'react';
-import { useEventListener, useThrottle } from '@falcon/utils';
+import { useThrottle } from '@falcon/utils';
 import { useModel, viewportsModel, useViewport } from '@falcon/host';
+import useCompositeEvent from './helper/useCompositeEvent';
+import { EVENT_TYPES } from './helper/const';
+import { HandlerEvent } from './helper/tools';
 
 const useWWWCTool = (id: string, target: RefObject<HTMLCanvasElement>) => {
-  const isDown = useRef<{ x: number; y: number }>();
+  const isDown = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   const { updateDisplayState } = useModel(viewportsModel);
   const { displayState } = useViewport(id);
 
-  useEventListener(target, 'mousedown', (e: Event) => {
-    const { pageX, pageY } = e as MouseEvent;
+  useCompositeEvent(target, EVENT_TYPES.TOUCHDOWN, (e: HandlerEvent) => {
+    const {
+      coords: { pageX, pageY },
+    } = e.detail;
     isDown.current = { x: pageX, y: pageY };
   });
 
-  useEventListener(
+  useCompositeEvent(
     target,
-    'mousemove',
-    useThrottle((e: Event) => {
-      if (!isDown.current) {
-        return;
-      }
-      const { pageX, pageY } = e as MouseEvent;
+    EVENT_TYPES.TOUCHMOVE,
+    useThrottle((e: HandlerEvent) => {
+      const {
+        coords: { pageX, pageY },
+      } = e.detail;
       const { x, y } = isDown.current;
       const deltaX = pageX - x;
       const deltaY = pageY - y;
@@ -35,10 +39,6 @@ const useWWWCTool = (id: string, target: RefObject<HTMLCanvasElement>) => {
       updateDisplayState(id, { wwwc });
     }, 30),
   );
-
-  useEventListener(target, 'mouseup', () => {
-    isDown.current = undefined;
-  });
 };
 
 export { useWWWCTool };

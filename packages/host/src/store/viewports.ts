@@ -1,3 +1,4 @@
+import { ImageData } from '@falcon/utils';
 import createModel from '../helper';
 
 interface DisplayState {
@@ -26,6 +27,7 @@ export interface Viewport {
   id: string;
   displayState: DisplayState;
   dicomInfo?: Partial<DicomInfo>;
+  imageData?: ImageData;
 }
 
 interface Store {
@@ -35,6 +37,7 @@ interface Store {
   removeViewport(id: string): void;
   updateDisplayState(id: string, displayState: Partial<DisplayState>): void;
   updateDicomInfo(id: string, dicomInfo: Partial<DicomInfo>): void;
+  updateImageData(id: string, imageData: ImageData): void;
 }
 
 const viewportsModel = createModel<Store>({
@@ -56,6 +59,9 @@ const viewportsModel = createModel<Store>({
   },
   updateDicomInfo(id, dicomInfo) {
     this.viewports[id].dicomInfo = Object.assign(this.viewports[id].dicomInfo || {}, dicomInfo);
+  },
+  updateImageData(id, imageData) {
+    this.viewports[id].imageData = imageData;
   },
 });
 

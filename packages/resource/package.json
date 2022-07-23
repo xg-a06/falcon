@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@falcon/utils": "workspace:^0.1.0",
+    "@falcon/utils": "workspace:^0.1.0",
     "dicom-parser": "^1.8.13",
     "gl-matrix": "^3.4.3"
   }

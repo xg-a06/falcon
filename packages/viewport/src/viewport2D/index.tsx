@@ -1,7 +1,6 @@
 import { useRef, useState, FC, useEffect } from 'react';
-import { useEventListener, useDebounceEffect, useUniqueId, getElmSize } from '@falcon/utils';
+import { useEventListener, useDebounceEffect, useUniqueId, getElmSize, ImageData, HTMLCanvasElementEx } from '@falcon/utils';
 import { viewportsModel, useModel, useViewport } from '@falcon/host';
-import { ImageData } from '@falcon/resource';
 import { RenderFunction, DisplayState } from '@falcon/renderer';
 import { useWWWCTool } from '@falcon/tool';
 import { Viewport2DContainer, IFrameResizer } from './style';
@@ -11,7 +10,7 @@ interface Props {
   renderFn: RenderFunction;
 }
 
-const generateDisplayState = (renderData: ImageData, elm: HTMLCanvasElement, initDisplayState: Partial<DisplayState>) => {
+const generateDisplayState = (renderData: ImageData, elm: HTMLCanvasElementEx, initDisplayState: Partial<DisplayState>) => {
   const { width, height } = getElmSize(elm);
   const { columns, rows } = renderData;
   const scale = Math.min(width / columns, height / rows);
@@ -24,7 +23,7 @@ const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
   const [size, setSize] = useState([0, 0]);
 
   const frameResizerRef = useRef<HTMLIFrameElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElementEx>(null);
   const isInit = useRef<boolean>(false);
 
   const id = useUniqueId();
@@ -70,7 +69,11 @@ const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
     if (!displayState) {
       return;
     }
-    renderFn(renderData, { elm: canvasRef.current!, displayState });
+    const ret = renderFn(renderData, { elm: canvasRef.current!, displayState });
+    if (ret) {
+      canvasRef.current.transform = ret.transform;
+      canvasRef.current.imageData = renderData;
+    }
   }, [renderData, renderFn, displayState]);
 
   return (

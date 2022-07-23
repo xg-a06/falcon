@@ -1,7 +1,7 @@
-import { ajax } from '@falcon/utils';
+import { ajax, ExtendData } from '@falcon/utils';
 import { PRIORITY_TYPES, RESOURCE_TYPES } from '../client/const';
 import { parserDicom } from './parserFactory';
-import { Tasks, ExtendData } from '../typing';
+import { Tasks } from '../typing';
 
 interface ISource {
   type: string;

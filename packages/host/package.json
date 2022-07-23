@@ -28,5 +28,8 @@
   "peerDependencies": {
     "immer": "^9.0.15",
     "zustand": "4.0.0-rc.2"
+  },
+  "dependencies": {
+    "@falcon/utils": "workspace:^0.1.0"
   }
 }

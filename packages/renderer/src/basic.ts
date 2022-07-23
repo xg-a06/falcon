@@ -1,6 +1,5 @@
-import { ImageData as RenderData } from '@falcon/resource';
-import { getElmSize } from '@falcon/utils';
-import { getVoiLUTData, Transform, WWWC } from './helper';
+import { ImageData as RenderData, Transform, getElmSize } from '@falcon/utils';
+import { getVoiLUTData, WWWC } from './helper';
 
 export interface DisplayState {
   hflip: boolean;
@@ -17,7 +16,7 @@ interface RenderOptions {
   displayState: DisplayState;
 }
 
-type RenderFunction = (renderData: RenderData | undefined, options: RenderOptions) => boolean;
+type RenderFunction = (renderData: RenderData | undefined, options: RenderOptions) => { transform: Transform } | false;
 
 interface TransformOptions extends Pick<DisplayState, 'offset' | 'angle' | 'scale' | 'hflip' | 'vflip'> {
   canvasWidth: number;
@@ -67,7 +66,7 @@ const setTransform = (ctx: CanvasRenderingContext2D, transformOptions: Transform
   return transform;
 };
 
-const basicRender: RenderFunction = (renderData, options): boolean => {
+const basicRender: RenderFunction = (renderData, options) => {
   if (renderData === undefined) {
     return false;
   }
@@ -99,11 +98,12 @@ const basicRender: RenderFunction = (renderData, options): boolean => {
     hflip,
     vflip,
   };
-  setTransform(ctx, transformOptions);
+
+  const transform = setTransform(ctx, transformOptions);
 
   ctx.drawImage(renderCanvas, 0, 0, columns, rows, 0, 0, columns, rows);
 
-  return true;
+  return { transform };
 };
 
 export { basicRender, RenderFunction };

@@ -31,6 +31,7 @@ importers:
       prettier: ^2.7.1
       react: ^18.2.0
       react-dom: ^18.2.0
+      react-refresh: ^0.14.0
       rimraf: ^3.0.2
       typescript: ^4.7.4
       zustand: 4.0.0-rc.2
@@ -62,6 +63,7 @@ importers:
       prettier: 2.7.1
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
+      react-refresh: 0.14.0
       rimraf: 3.0.2
       typescript: 4.7.4
       zustand: 4.0.0-rc.2_immer@9.0.15+react@18.2.0
@@ -99,16 +101,19 @@ importers:
       cross-env: 7.0.3
       glob: 8.0.3
 
+  packages/host:
+    specifiers:
+      '@falcon/utils': workspace:^0.1.0
+    dependencies:
+      '@falcon/utils': link:../utils
+
   packages/renderer:
     specifiers:
       '@falcon/resource': workspace:^0.1.0
       '@falcon/utils': workspace:^0.1.0
-      gl-matrix: ^3.4.3
     dependencies:
       '@falcon/resource': link:../resource
       '@falcon/utils': link:../utils
-    devDependencies:
-      gl-matrix: 3.4.3
 
   packages/resource:
     specifiers:
@@ -131,8 +136,10 @@ importers:
   packages/utils:
     specifiers:
       '@types/uuid': ^8.3.4
+      gl-matrix: ^3.4.3
       uuid: ^8.3.2
     dependencies:
+      gl-matrix: 3.4.3
       uuid: 8.3.2
     devDependencies:
       '@types/uuid': 8.3.4
@@ -5521,6 +5528,7 @@ packages:
 
   /gl-matrix/3.4.3:
     resolution: {integrity: sha512-wcCp8vu8FT22BnvKVPjXa/ICBWRq/zjFfdofZy1WSpQZpphblv12/bOQLBC1rMM7SGOFS9ltVmKOHil5+Ml7gA==}
+    dev: false
 
   /glob-parent/5.1.2:
     resolution: {integrity: sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow==}
@@ -7900,6 +7908,11 @@ packages:
 
   /react-refresh/0.11.0:
     resolution: {integrity: sha512-F27qZr8uUqwhWZboondsPx8tnC3Ct3SxZA3V5WyEvujRyyNv0VYPhoBg1gZ8/MV5tubQp76Trw8lTv9hzRBa+A==}
+    engines: {node: '>=0.10.0'}
+    dev: true
+
+  /react-refresh/0.14.0:
+    resolution: {integrity: sha512-wViHqhAd8OHeLS/IRMJjTSDHF3U9eWi62F/MledQGPdJGDhodXJ9PBLNGr6WWL7qlH12Mt3TyTpbS+hGXMjCzQ==}
     engines: {node: '>=0.10.0'}
     dev: true
 

@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@falcon/host": "workspace:^0.1.0",
+    "@falcon/utils": "workspace:^0.1.0",
     "@falcon/utils": "workspace:^0.1.0"
   }
 }

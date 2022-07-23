@@ -1,5 +1,5 @@
 /* eslint-disable prefer-const */
-import { ImageData } from '@falcon/resource';
+import { ImageData } from '@falcon/utils';
 
 export interface WWWC {
   ww: number;
