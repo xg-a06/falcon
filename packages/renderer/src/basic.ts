@@ -1,29 +1,13 @@
-import { ImageData as RenderData, Transform, getElmSize } from '@falcon/utils';
-import { getVoiLUTData, WWWC } from './helper';
-
-export interface DisplayState {
-  hflip: boolean;
-  vflip: boolean;
-  scale: number;
-  angle: number;
-  invert: boolean;
-  offset: { x: number; y: number };
-  wwwc: { ww: number; wc: number };
-}
+import { ImageData as RenderData, HTMLCanvasElementEx, getElmSize } from '@falcon/utils';
+import { getVoiLUTData, WWWC, setTransform } from './helper';
+import { DisplayState } from './typing';
 
 interface RenderOptions {
-  elm: HTMLCanvasElement;
+  elm: HTMLCanvasElementEx;
   displayState: DisplayState;
 }
 
-type RenderFunction = (renderData: RenderData | undefined, options: RenderOptions) => { transform: Transform } | false;
-
-interface TransformOptions extends Pick<DisplayState, 'offset' | 'angle' | 'scale' | 'hflip' | 'vflip'> {
-  canvasWidth: number;
-  canvasHeight: number;
-  renderCanvasWidth: number;
-  renderCanvasHeight: number;
-}
+type RenderFunction = (renderData: RenderData | undefined, options: RenderOptions) => boolean;
 
 const generateImageData = (renderData: RenderData, wwwc: WWWC): ImageData => {
   const { columns, rows, pixelData, minPixelValue } = renderData;
@@ -51,21 +35,6 @@ const generateRenderCanvas = (width: number, height: number, imageData: ImageDat
   return renderCanvas;
 };
 
-const setTransform = (ctx: CanvasRenderingContext2D, transformOptions: TransformOptions): Transform => {
-  const { canvasWidth, canvasHeight, renderCanvasWidth, renderCanvasHeight, offset, angle, scale, hflip, vflip } = transformOptions;
-  const transform = new Transform();
-  transform.reset();
-  transform.translate(offset.x, offset.y);
-  transform.translate(canvasWidth / 2, canvasHeight / 2);
-  transform.scale(scale, scale);
-  transform.rotate(angle);
-  transform.scale(hflip ? -1 : 1, vflip ? -1 : 1);
-  transform.translate(-renderCanvasWidth / 2, -renderCanvasHeight / 2);
-  ctx.setTransform(transform.mat[0], transform.mat[1], transform.mat[2], transform.mat[3], transform.mat[4], transform.mat[5]);
-
-  return transform;
-};
-
 const basicRender: RenderFunction = (renderData, options) => {
   if (renderData === undefined) {
     return false;
@@ -87,7 +56,7 @@ const basicRender: RenderFunction = (renderData, options) => {
   ctx.fillStyle = 'black';
   ctx.fillRect(0, 0, width, height);
 
-  const transformOptions: TransformOptions = {
+  const transformOptions = {
     canvasWidth: width,
     canvasHeight: height,
     renderCanvasWidth: columns,
@@ -99,11 +68,11 @@ const basicRender: RenderFunction = (renderData, options) => {
     vflip,
   };
 
-  const transform = setTransform(ctx, transformOptions);
+  setTransform(elm, transformOptions);
 
   ctx.drawImage(renderCanvas, 0, 0, columns, rows, 0, 0, columns, rows);
 
-  return { transform };
+  return true;
 };
 
 export { basicRender, RenderFunction };

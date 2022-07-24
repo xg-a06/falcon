@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
-import { ImageData } from '../typing';
+import { ImageData } from '@falcon/utils';
 import CharLS from '../codecs/charLS-DynamicMemory-browser';
 
 let charLS: any;

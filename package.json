@@ -30,6 +30,7 @@
   },
   "homepage": "https://github.com/xg-a06/ts_lib_tpl#readme",
   "devDependencies": {
+    "@babel/core": "^7.18.9",
     "@babel/runtime": "^7.18.6",
     "@changesets/cli": "^2.23.0",
     "@commitlint/cli": "^17.0.3",
@@ -58,6 +59,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-refresh": "^0.14.0",
+    "regenerator-runtime": "^0.13.9",
     "rimraf": "^3.0.2",
     "typescript": "^4.7.4",
     "zustand": "4.0.0-rc.2"

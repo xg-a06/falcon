@@ -12,7 +12,7 @@ const useThrottle = (cb: Callback, delay: number) => {
   const debFn = useCallback((...args: Array<any>) => {
     if (current.timer === undefined) {
       current.fn.apply(this, args);
-      current.timer = setTimeout(() => {
+      current.timer = window.setTimeout(() => {
         current.timer = undefined;
       }, delay);
     }

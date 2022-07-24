@@ -10,7 +10,7 @@ interface Coords {
   offsetY: number;
   imageX: number;
   imageY: number;
-  isInValidArea: boolean;
+  isInValidArea?: boolean;
 }
 
 interface HandlerEvent extends Event {
@@ -28,17 +28,12 @@ interface HandlerEvent extends Event {
 
 const analysisCoords = (target: HTMLCanvasElement, e: MouseEvent): Coords | boolean => {
   const { pageX, pageY, clientX, clientY } = e;
-  const { imageData, transform } = target as HTMLCanvasElementEx;
-  if (!imageData) {
-    return false;
-  }
-  const { columns, rows } = imageData;
+  const { transform } = target as HTMLCanvasElementEx;
+
   const { left, top } = target.getBoundingClientRect();
   const offsetX = pageX - left;
   const offsetY = pageY - top;
   const { x: imageX, y: imageY } = transform.invertPoint(offsetX, offsetY);
-
-  const isInValidArea = !(imageX < 0 || imageX >= columns || imageY < 0 || imageY >= rows);
 
   return {
     pageX,
@@ -49,7 +44,6 @@ const analysisCoords = (target: HTMLCanvasElement, e: MouseEvent): Coords | bool
     offsetY,
     imageX,
     imageY,
-    isInValidArea,
   };
 };
 

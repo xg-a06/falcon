@@ -1,5 +1,5 @@
 /* eslint-disable no-param-reassign */
-import { ImageData } from '../typing';
+import { ImageData } from '@falcon/utils';
 
 function decodeLittleEndian(metaData: ImageData, pixelData: Uint8Array): ImageData {
   let arrayBuffer = pixelData.buffer;

@@ -3,12 +3,12 @@
 /* eslint-disable no-fallthrough */
 /* eslint-disable no-bitwise */
 import dicomParser, { DataSet, readEncapsulatedImageFrame, createJPEGBasicOffsetTable, readEncapsulatedPixelDataFromFragments } from 'dicom-parser';
+import { ImageData, ExtendData } from '@falcon/utils';
 import { getNumberValues, getNumberValue, stringUTF8, getComporessionState } from '../helper/tools';
 import decodeLittleEndian from '../decoders/decodeLittleEndian';
 import decodeBigEndian from '../decoders/decodeBigEndian';
 import decodeRLE from '../decoders/decodeRLE';
 // import decodeJPEGLS from '../decoders/decodeJPEGLS';
-import { ImageData, ExtendData } from '../typing';
 import Tags from '../tagMap';
 
 const getDicomData = (arrayBuffer: ArrayBuffer): DataSet | void => {

@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
-import { ImageData } from '../typing';
+import { ImageData } from '@falcon/utils';
 
 function decode8(metaData: ImageData, pixelData: Uint8Array) {
   const frameData = pixelData;

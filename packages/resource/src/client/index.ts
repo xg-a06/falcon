@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { EventEmitter } from '@falcon/utils';
+import { EventEmitter, ImageData } from '@falcon/utils';
 import { RESOURCE_TYPES, RESOURCE_EVENTS, PRIORITY_TYPES } from './const';
-import { Tasks, ImageData } from '../typing';
+import { Tasks } from '../typing';
 
 interface ResourceClientOptions {}
 
