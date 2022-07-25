@@ -80,6 +80,7 @@ importers:
       '@emotion/styled': ^11.9.3
       '@falcon/renderer': workspace:^0.1.0
       '@falcon/resource': workspace:^0.1.0
+      '@falcon/utils': workspace:^0.1.0
       '@falcon/viewport': workspace:^0.1.0
       '@types/react': ^18.0.14
       '@types/react-dom': ^18.0.5
@@ -91,6 +92,7 @@ importers:
     dependencies:
       '@falcon/renderer': link:../packages/renderer
       '@falcon/resource': link:../packages/resource
+      '@falcon/utils': link:../packages/utils
       '@falcon/viewport': link:../packages/viewport
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0

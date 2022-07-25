@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { ImageData } from '@falcon/utils';
 import { Viewport2D } from '@falcon/viewport';
 import { basicRender } from '@falcon/renderer';
 import { ResourceProvider, useResourceRequest, useResourceData, CustomTasks, QueryCache } from '@falcon/resource';
@@ -22,7 +23,7 @@ const index = 0;
 const App = () => {
   useResourceRequest(testTasks);
   const [showData, setShowData] = useState<QueryCache>({ cachedKey: '1.2.840.113704.1.111.7072.1527652439.48_axial', index: 0 });
-  const resource = useResourceData(showData) as ImageData;
+  const resource = useResourceData(showData) as unknown as ImageData;
   // useEffect(() => {
   //   setInterval(() => {
   //     let i = ++index;
