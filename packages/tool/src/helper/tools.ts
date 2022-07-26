@@ -1,5 +1,5 @@
 import { HTMLCanvasElementEx } from '@falcon/utils';
-// import { EVENT_LEVELS } from './const';
+import { BUTTON_TYPES } from './const';
 
 interface Coords {
   pageX: number;
@@ -17,14 +17,9 @@ interface HandlerEvent extends Event {
   target: HTMLCanvasElement;
   detail: {
     coords: Coords;
-    button: number;
+    button: typeof BUTTON_TYPES[keyof typeof BUTTON_TYPES];
   };
 }
-
-// const getAction = (eventName: string) => {
-//   const tmp = eventName.toLocaleLowerCase().split('_');
-//   return tmp[tmp.length - 1];
-// };
 
 const analysisCoords = (target: HTMLCanvasElement, e: MouseEvent): Coords | boolean => {
   const { pageX, pageY, clientX, clientY } = e;
@@ -46,18 +41,6 @@ const analysisCoords = (target: HTMLCanvasElement, e: MouseEvent): Coords | bool
     imageY,
   };
 };
-
-// const EventHandler = (e: Event) => {
-//   const event = e as HandlerEvent;
-//   const { type, target } = event;
-//   const action = getAction(type);
-
-//   target.tools.forEach((tool: any) => {
-//     if (tool.level >= EVENT_LEVELS[type] && tool[action] && (event.detail.button === -1 || event.detail.button === tool.button)) {
-//       tool[action](e);
-//     }
-//   });
-// };
 
 const dispatchEvent = (target: HTMLCanvasElement, eventName: string, detail: any = {}) => {
   const event = new CustomEvent(eventName, { detail });
