@@ -1,8 +1,7 @@
 import { useRef, RefObject } from 'react';
-import { useThrottle } from '@falcon/utils';
+import { useThrottle, EVENT_TYPES } from '@falcon/utils';
 import { useModel, viewportsModel, useViewport } from '@falcon/host';
 import useCompositeEvent, { ToolOptions } from './helper/useCompositeEvent';
-import { EVENT_TYPES } from './helper/const';
 import { HandlerEvent } from './helper/tools';
 
 const useWWWCTool = (id: string, target: RefObject<HTMLCanvasElement>, options: ToolOptions) => {

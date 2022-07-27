@@ -1,5 +1,4 @@
-import { HTMLCanvasElementEx } from '@falcon/utils';
-import { BUTTON_TYPES } from './const';
+import { HTMLCanvasElementEx, BUTTON_TYPES } from '@falcon/utils';
 
 interface Coords {
   pageX: number;

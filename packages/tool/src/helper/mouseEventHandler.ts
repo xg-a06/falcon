@@ -1,4 +1,4 @@
-import { EVENT_TYPES } from './const';
+import { EVENT_TYPES } from '@falcon/utils';
 import { dispatchEvent, check } from './tools';
 
 interface MouseEventEx extends MouseEvent {

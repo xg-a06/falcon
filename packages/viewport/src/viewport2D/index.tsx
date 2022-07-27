@@ -1,8 +1,8 @@
 import { useRef, useState, FC, useEffect } from 'react';
-import { useEventListener, useDebounceEffect, useUniqueId, getElmSize, ImageData, HTMLCanvasElementEx } from '@falcon/utils';
+import { useEventListener, useDebounceEffect, useUniqueId, getElmSize, ImageData, HTMLCanvasElementEx, TOOL_STATES, EVENT_TYPES, BUTTON_TYPES } from '@falcon/utils';
 import { viewportsModel, useModel, useViewport } from '@falcon/host';
 import { RenderFunction, DisplayState } from '@falcon/renderer';
-import { useWWWCTool, ToolOptions } from '@falcon/tool';
+import { useLengthTool, ToolOptions, dispatchEvent } from '@falcon/tool';
 import { Viewport2DContainer, IFrameResizer } from './style';
 
 interface Props {
@@ -19,7 +19,7 @@ const generateDisplayState = (renderData: ImageData, elm: HTMLCanvasElementEx, i
   return ret;
 };
 
-const wwwcToolOptions: ToolOptions = { state: 3, button: 2 };
+const wwwcToolOptions: ToolOptions = { state: TOOL_STATES.ACTIVE, button: BUTTON_TYPES.LEFT };
 
 const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
   const [size, setSize] = useState([0, 0]);
@@ -65,13 +65,15 @@ const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
     frameResizerRef.current!.contentWindow!.dispatchEvent(new Event('resize'));
   }, []);
 
-  useWWWCTool(id, canvasRef, wwwcToolOptions);
+  useLengthTool(id, canvasRef, wwwcToolOptions);
 
   useEffect(() => {
     if (!displayState || !renderData) {
       return;
     }
     renderFn(renderData, { elm: canvasRef.current!, displayState });
+
+    dispatchEvent(canvasRef.current!, EVENT_TYPES.RENDERED, { button: BUTTON_TYPES.NONE });
   }, [renderData, renderFn, displayState]);
 
   return (

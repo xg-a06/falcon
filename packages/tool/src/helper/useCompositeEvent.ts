@@ -1,18 +1,12 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { RefObject, useEffect, useCallback } from 'react';
-import { useEvent } from '@falcon/utils';
-import { EVENT_LEVELS, TOOL_STATES, BUTTON_TYPES } from './const';
+import { useEvent, EVENT_LEVELS, ToolOptions } from '@falcon/utils';
 import { mousedownHandler } from './mouseEventHandler';
 import { HandlerEvent } from './tools';
 
 type EventListener = (e: HandlerEvent) => void;
 
 type StringToNumber<T extends string, A extends any[] = []> = T extends keyof [0, ...A] ? A['length'] : StringToNumber<T, [0, ...A]>;
-
-type ToolOptions = {
-  state: typeof TOOL_STATES[keyof typeof TOOL_STATES];
-  button: typeof BUTTON_TYPES[keyof typeof BUTTON_TYPES];
-};
 
 const empty = () => undefined;
 
@@ -51,7 +45,8 @@ const useCompositeEvent = (target: RefObject<HTMLCanvasElement>, eventName: keyo
       const {
         detail: { button: eventBtn },
       } = e;
-      if (eventBtn !== button || state < EVENT_LEVELS[eventName]) {
+
+      if ((eventBtn !== -1 && eventBtn !== button) || state < EVENT_LEVELS[eventName]) {
         return;
       }
       fn(e);
