@@ -1,8 +1,8 @@
 import { useRef, useState, FC, useEffect } from 'react';
-import { useEventListener, useDebounceEffect, useUniqueId, getElmSize, ImageData, HTMLCanvasElementEx, TOOL_STATES, EVENT_TYPES, BUTTON_TYPES } from '@falcon/utils';
+import { useEventListener, useDebounceEffect, useUniqueId, getElmSize, ImageData, HTMLCanvasElementEx, TOOL_STATES, EVENT_TYPES, BUTTON_TYPES, ToolOptions } from '@falcon/utils';
 import { viewportsModel, useModel, useViewport } from '@falcon/host';
 import { RenderFunction, DisplayState } from '@falcon/renderer';
-import { useLengthTool, ToolOptions, dispatchEvent } from '@falcon/tool';
+import { useLengthTool, dispatchEvent } from '@falcon/tool';
 import { Viewport2DContainer, IFrameResizer } from './style';
 
 interface Props {

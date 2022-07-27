@@ -1,6 +1,6 @@
 import { useRef, RefObject, useCallback } from 'react';
-import { EVENT_TYPES } from '@falcon/utils';
-import useCompositeEvent, { ToolOptions } from './helper/useCompositeEvent';
+import { EVENT_TYPES, ToolOptions } from '@falcon/utils';
+import useCompositeEvent from './helper/useCompositeEvent';
 import { HandlerEvent } from './helper/tools';
 
 type Point = { x: number; y: number };

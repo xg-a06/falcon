@@ -6,8 +6,6 @@ import { HandlerEvent } from './tools';
 
 type EventListener = (e: HandlerEvent) => void;
 
-type StringToNumber<T extends string, A extends any[] = []> = T extends keyof [0, ...A] ? A['length'] : StringToNumber<T, [0, ...A]>;
-
 const empty = () => undefined;
 
 const attachEvent = (canvas: HTMLCanvasElement) => {
@@ -66,7 +64,5 @@ const useCompositeEvent = (target: RefObject<HTMLCanvasElement>, eventName: keyo
     return () => target.current?.removeEventListener(eventName, cbEvent);
   }, []);
 };
-
-export { ToolOptions };
 
 export default useCompositeEvent;
