@@ -1,6 +1,6 @@
 import { useRef, useState, FC, useEffect } from 'react';
-import { useEventListener, useDebounceEffect, useUniqueId, getElmSize, ImageData, HTMLCanvasElementEx, TOOL_STATES, EVENT_TYPES, BUTTON_TYPES, ToolOptions } from '@falcon/utils';
-import { viewportsModel, useModel, useViewport } from '@falcon/host';
+import { useEventListener, useDebounceEffect, useUniqueId, getElmSize, ImageData, HTMLCanvasElementEx, TOOL_STATES, EVENT_TYPES, BUTTON_TYPES, ToolOptions, cloneObjWithoutKeys } from '@falcon/utils';
+import { viewportsModel, useModel, useViewport, useToolData } from '@falcon/host';
 import { RenderFunction, DisplayState } from '@falcon/renderer';
 import { useLengthTool, dispatchEvent } from '@falcon/tool';
 import { Viewport2DContainer, IFrameResizer } from './style';
@@ -29,19 +29,9 @@ const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
   const isInit = useRef<boolean>(false);
 
   const id = useUniqueId();
-  const { addViewport } = useModel(viewportsModel);
+  const { addViewport, updateImageData } = useModel(viewportsModel);
   const { displayState } = useViewport(id);
-
-  useEffect(() => {
-    if (renderData && !isInit.current) {
-      const initDisplayState = generateDisplayState(renderData, canvasRef.current!, {});
-      addViewport({
-        id,
-        displayState: initDisplayState,
-      });
-      isInit.current = true;
-    }
-  }, [renderData]);
+  const toolsData = useToolData(id);
 
   useDebounceEffect(() => {
     const [width, height] = size;
@@ -68,13 +58,30 @@ const Viewport2D: FC<Props> = ({ renderData, renderFn }) => {
   useLengthTool(id, canvasRef, wwwcToolOptions);
 
   useEffect(() => {
+    if (!renderData) {
+      return;
+    }
+
+    if (!isInit.current) {
+      const initDisplayState = generateDisplayState(renderData, canvasRef.current!, {});
+      addViewport({
+        id,
+        displayState: initDisplayState,
+      });
+      isInit.current = true;
+    }
+
+    updateImageData(id, cloneObjWithoutKeys(renderData, ['imageData']) as Omit<ImageData, 'imageData'>);
+  }, [renderData]);
+
+  useEffect(() => {
     if (!displayState || !renderData) {
       return;
     }
     renderFn(renderData, { elm: canvasRef.current!, displayState });
 
     dispatchEvent(canvasRef.current!, EVENT_TYPES.RENDERED, { button: BUTTON_TYPES.NONE });
-  }, [renderData, renderFn, displayState]);
+  }, [renderData, renderFn, displayState, toolsData]);
 
   return (
     <Viewport2DContainer>

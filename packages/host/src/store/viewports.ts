@@ -27,7 +27,7 @@ export interface Viewport {
   id: string;
   displayState: DisplayState;
   dicomInfo?: Partial<DicomInfo>;
-  imageData?: ImageData;
+  imageData?: Omit<ImageData, 'imageData'>;
 }
 
 interface Store {
@@ -60,7 +60,7 @@ const viewportsModel = createModel<Store>({
   updateDicomInfo(id, dicomInfo) {
     this.viewports[id].dicomInfo = Object.assign(this.viewports[id].dicomInfo || {}, dicomInfo);
   },
-  updateImageData(id, imageData) {
+  updateImageData(id, imageData: Omit<ImageData, 'imageData'>) {
     this.viewports[id].imageData = imageData;
   },
 });

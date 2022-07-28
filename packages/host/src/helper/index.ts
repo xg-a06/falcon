@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import create, { UseBoundStore, StoreApi, StateCreator } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import produce from 'immer';
+import produce, { Immer, original, isDraft } from 'immer';
 
 interface Config {
   key: string;
@@ -42,4 +43,5 @@ export const useModel = <T extends Config>(useStore: UseBoundStore<StoreApi<T>>)
     },
   ) as T;
 
+export { produce };
 export default createModel;

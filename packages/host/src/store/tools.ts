@@ -4,13 +4,20 @@ import createModel from '../helper';
 interface Store {
   key: string;
   tools: Record<string, ToolOptions>;
-  toolData: Record<string, any>;
+  toolsData: Record<string, any>;
+  updateToolData(toolType: string, id: string, data: Record<string, any>): void;
 }
 
-const viewportsModel = createModel<Store>({
+const toolsModel = createModel<Store>({
   key: 'tools',
   tools: {},
-  toolData: {},
+  toolsData: {},
+  updateToolData(id, tooltype, data) {
+    if (!this.toolsData[id]) {
+      this.toolsData[id] = {};
+    }
+    this.toolsData[id][tooltype] = data;
+  },
 });
 
-export { viewportsModel };
+export { toolsModel };
