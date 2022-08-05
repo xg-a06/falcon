@@ -79,7 +79,6 @@ const baseConfig = {
     new webpack.DefinePlugin({
       'process.env': {
         BUILD_ENV: JSON.stringify(process.env.BUILD_ENV),
-        NODE_ENV: JSON.stringify(process.env.NODE_ENV),
         API_PATH: JSON.stringify(config[process.env.BUILD_ENV].API_PATH),
       },
     }),
