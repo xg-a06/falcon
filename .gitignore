@@ -7,7 +7,6 @@ docs
 .nyc_output
 .DS_Store
 .awcache
-.vscode
 .idea
 .rpt2_cache
 .dist
