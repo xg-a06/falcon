@@ -10,5 +10,4 @@ module.exports = {
   useTabs: false,
   trailingComma: 'all',
   arrowParens: 'avoid',
-  endOfLine: 'auto',
 };
